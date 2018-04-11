@@ -1,4 +1,4 @@
-Getting Started
+시작하기
 ===============
 
 이 프로젝트는 [ReactiveX.io](http://reactivex.io/)와 일관성을 유지할 예정입니다. 크로스 플랫폼 문서 및 튜토리얼은 RxSwift의 경우에도 유효해야 합니다.
