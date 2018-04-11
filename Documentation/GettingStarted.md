@@ -256,17 +256,17 @@ someObservable
 이벤트 처리 끝
 ```
 
-## Creating your own `Observable` (aka observable sequence)
+## 나만의 `옵저버블` 만들기 (aka 옵저버블 시퀀스)
 
-There is one crucial thing to understand about observables.
+이 부분은 옵저버블을 이해하는데에 아주 필수적인 부분입니다.
 
-**When an observable is created, it doesn't perform any work simply because it has been created.**
+**옵저버블이 만들어지면, 그것은 단들어졌을 뿐이기 때문에 아무일도 하지 않습니다.**
 
-It is true that `Observable` can generate elements in many ways. Some of them cause side effects and some of them tap into existing running processes like tapping into mouse events, etc.
+`옵저버블`이 다양한 방법으로 요소를 만들 수 있다는 것은 사실입니다. 그 중 어떤 방법은 부작용을 일으킬 수 있고 또 다른 방법은 마우스 이벤트를 탭하는 것과 같이 이미 실행되고 있는 프로세스에 접근하기도 합니다.
 
-**However, if you just call a method that returns an `Observable`, no sequence generation is performed and there are no side effects. `Observable` just defines how the sequence is generated and what parameters are used for element generation. Sequence generation starts when `subscribe` method is called.**
+**하지만, 만약 여러분이 그저 `옵저버블`을 반환하는 메소드를 호출했다면, 시퀀스 생성은 일어나지 않을 것이고 부작용도 없을 것입니다. `옵저버블`은 그저 시퀀스가 어떻게 만들어지고 요소 생성에 어떤 파라미터가 필요한지에 대해 적혀있을 뿐입니다. 시퀀스 생성은 `subscribe` 메소드가 호출됐을 때 시작됩니다.**
 
-E.g. Let's say you have a method with similar prototype:
+예를 들어, 비슷한 프로토타입을 가진 메소드가 있다고 해봅시다:
 
 ```swift
 func searchWikipedia(searchTerm: String) -> Observable<Results> {}
@@ -275,21 +275,21 @@ func searchWikipedia(searchTerm: String) -> Observable<Results> {}
 ```swift
 let searchForMe = searchWikipedia("me")
 
-// no requests are performed, no work is being done, no URL requests were fired
+// 아무 리퀘스트도 실행되지 않으며, 어떤 작업도 작동하지 않고, URL 리퀘스트도 발생하지 않습니다
 
 let cancel = searchForMe
-  // sequence generation starts now, URL requests are fired
+  // 여기서 시퀀스 생성이 시작되고, URL 리퀘스트들이 발생합니다
   .subscribe(onNext: { results in
       print(results)
   })
 
 ```
 
-There are a lot of ways to create your own `Observable` sequence. The easiest way is probably to use the `create` function.
+자신의 `옵저버블` 시퀀스를 만드는 방법은 아주 많습니다. 가장 쉬운 방법은 아마 `create` 함수를 사용하는 것입니다.
 
-Let's write a function that creates a sequence which returns one element upon subscription. That function is called 'just'.
+구독을 하면 하나의 요소를 반환하는 시퀀스를 만드는 함수를 작성해봅시다. 이 함수를 `just`라고 부릅니다.
 
-*This is the actual implementation*
+*실제 구현 방법은 아래와 같습니다*
 
 ```swift
 func myJust<E>(_ element: E) -> Observable<E> {
@@ -306,23 +306,23 @@ myJust(0)
     })
 ```
 
-This will print:
+결과는 다음과 같을 것입니다:
 
 ```
 0
 ```
 
-Not bad. So what is the `create` function?
+나쁘지 않네요. 그러면 `create` 함수는 뭘까요?
 
-It's just a convenience method that enables you to easily implement `subscribe` method using Swift closures. Like `subscribe` method it takes one argument, `observer`, and returns disposable.
+`create` 함수는 스위프트 클로저를 사용해서 우리가 쉽게 `subscribe` 메소드를 구현하는 것을 가능하게 해주는 메소드입니다. `subscribe` 메소드처럼 딱 하나 `observer` 만 받아서 disposable을 반환합니다.
 
-Sequence implemented this way is actually synchronous. It will generate elements and terminate before `subscribe` call returns disposable representing subscription. Because of that it doesn't really matter what disposable it returns, process of generating elements can't be interrupted.
+이런 방법으로 구현하는 시퀀스는 실제로 동기성을 띕니다. 요소를 만들고 `subscribe` 가 호출되고 disposable을 반환하기 전에 종료됩니다. 왜냐하면 어떤 disposable을 반환하는지 상관없고, 요소를 만드는 작업은 방해할 수 없기 때문입니다.
 
-When generating synchronous sequences, the usual disposable to return is singleton instance of `NopDisposable`.
+동기 시퀀스를 만들때, 반환될 보통의 disposable `NopDisposable`의 싱글톤 인스턴스입니다.
 
-Lets now create an observable that returns elements from an array.
+배열의 요소를 반환하는 옵저버블을 만들어봅시다.
 
-*This is the actual implementation*
+*아래는 실제 구현 코드입니다*
 
 ```swift
 func myFrom<E>(_ sequence: [E]) -> Observable<E> {
@@ -340,7 +340,7 @@ let stringCounter = myFrom(["first", "second"])
 
 print("Started ----")
 
-// first time
+// 첫 시도
 stringCounter
     .subscribe(onNext: { n in
         print(n)
@@ -348,7 +348,7 @@ stringCounter
 
 print("----")
 
-// again
+// 다시
 stringCounter
     .subscribe(onNext: { n in
         print(n)
@@ -357,7 +357,7 @@ stringCounter
 print("Ended ----")
 ```
 
-This will print:
+아래와 같이 출력될 것입니다:
 
 ```
 Started ----
