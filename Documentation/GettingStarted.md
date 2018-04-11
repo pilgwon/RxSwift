@@ -5,7 +5,7 @@
 
 1. [Observables aka Sequences](#observables-aka-sequences)
 1. [Disposing](#disposing)
-1. [Implicit `Observable` guarantees](#Implicit-Observable-guarantees)
+1. [Implicit `Observable` guarantees](#implicit-observable-guarantees)
 1. [Creating your first `Observable` (aka observable sequence)](#creating-your-own-observable-aka-observable-sequence)
 1. [Creating an `Observable` that performs work](#creating-an-observable-that-performs-work)
 1. [Sharing subscription and `shareReplay` operator](#sharing-subscription-and-sharereplay-operator)
