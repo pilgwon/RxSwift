@@ -5,7 +5,7 @@
 
 1. [Observables aka Sequences](#observables-aka-sequences)
 1. [Disposing](#disposing)
-1. [Implicit `Observable` guarantees](#implicit-observable-guarantees)
+1. [`Observable`이 보장하는 사항들 (Implicit `Observable` guarantees)](#observable이-보장하는-사항들)
 1. [Creating your first `Observable` (aka observable sequence)](#creating-your-own-observable-aka-observable-sequence)
 1. [Creating an `Observable` that performs work](#creating-an-observable-that-performs-work)
 1. [Sharing subscription and `shareReplay` operator](#sharing-subscription-and-sharereplay-operator)
@@ -217,8 +217,7 @@ sequence
     }
 ```
 
-## Implicit `Observable` guarantees
-### 내장된 `Observable`에 대해 보증된 사항들
+## `Observable`이 보장하는 사항들
 
 모든 시퀀스 생성자들(`Observables`)이 지켜야하는 추가적인 규칙들이 있습니다.
 
