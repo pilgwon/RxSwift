@@ -1,11 +1,11 @@
 Getting Started
 ===============
 
-This project tries to be consistent with [ReactiveX.io](http://reactivex.io/). The general cross platform documentation and tutorials should also be valid in case of `RxSwift`.
+이 프로젝트는 [ReactiveX.io](http://reactivex.io/)와 일관성을 유지할 예정입니다. 크로스 플랫폼 문서 및 튜토리얼은 RxSwift의 경우에도 유효해야 합니다.
 
 1. [Observables aka Sequences](#observables-aka-sequences)
 1. [Disposing](#disposing)
-1. [Implicit `Observable` guarantees](#implicit-observable-guarantees)
+1. [Implicit `Observable` guarantees](#Implicit-Observable-guarantees)
 1. [Creating your first `Observable` (aka observable sequence)](#creating-your-own-observable-aka-observable-sequence)
 1. [Creating an `Observable` that performs work](#creating-an-observable-that-performs-work)
 1. [Sharing subscription and `shareReplay` operator](#sharing-subscription-and-sharereplay-operator)
@@ -27,62 +27,64 @@ This project tries to be consistent with [ReactiveX.io](http://reactivex.io/). T
 
 # Observables aka Sequences
 
-## Basics
-The [equivalence](MathBehindRx.md) of observer pattern (`Observable<Element>` sequence) and normal sequences (`Sequence`) is the most important thing to understand about Rx.
+## 기초
+옵저버 패턴(`Observable<Element>` 시퀀스)과 보통의 시퀀스(`Sequence`) 사이의 [동등성](https://github.com/ReactiveX/RxSwift/blob/master/Documentation/MathBehindRx.md)을 아는 것은 Rx를 이해하기 위한 가장 중요한 요소 중 하나입니다.
 
-**Every `Observable` sequence is just a sequence. The key advantage for an `Observable` vs Swift's `Sequence` is that it can also receive elements asynchronously. This is the kernel of the RxSwift, documentation from here is about ways that we expand on that idea.**
+**모든 `Observable` 시퀀스는 그냥 시퀀스이기도 합니다. `Observable`과 Swift의 `Sequence`간의 비교 중 가장 핵심적인 이점은 요소들을 비동기로 받을 수 있다는 점입니다. 이것은 RxSwift의 커널이며, 여기 문서에서는 그 아이디어를 확장하는 방법에 대해 다룰 것입니다.**
 
-* `Observable`(`ObservableType`) is equivalent to `Sequence`
-* `ObservableType.subscribe` method is equivalent to `Sequence.makeIterator` method.
-* Observer (callback) needs to be passed to `ObservableType.subscribe` method to receive sequence elements instead of calling `next()` on the returned iterator.
+* `Observable`(`ObservableType`)은 `Sequence`와 동일합니다.
 
-Sequences are a simple, familiar concept that is **easy to visualize**.
+* `ObservableType.subscribe` 메소드는 `Sequence.makeIterator` 메소드와 동일합니다.
 
-People are creatures with huge visual cortexes. When we can visualize a concept easily, it's a lot easier to reason about it.
+* 옵저버(콜백)는 반환된 이터레이터에서 `next()` 메소드를 호출하는 대신에 시퀀스 요소를 받기 위해 `ObservableType.subscribe` 메소드에 전달돼야 합니다.
 
-We can lift a lot of the cognitive load from trying to simulate event state machines inside every Rx operator onto high level operations over sequences.
+시퀀스는 **시각화하기 쉬운** 간단하고 친근한 개념입니다.
 
-If we don't use Rx but model asynchronous systems, that probably means our code is full of state machines and transient states that we need to simulate instead of abstracting away.
+인간은 거대한 시각 피질을 가진 생물입니다. 개념을 쉽게 시각화할 수 있다면, 그러한 이유에 대해 아는 것은 어렵지 않습니다.
 
-Lists and sequences are probably one of the first concepts mathematicians and programmers learn.
+모든 Rx 연산자의 이벤트 상태 기계를 시퀀스보다 높은 수준의 작업으로 시뮬레이션하는 시도는 우리에게 인지적 부하를 많이 줄 수 있습니다.
 
-Here is a sequence of numbers:
+만약 우리가 Rx를 쓰지않고 모델 비동기 시스템을 쓴다면 그것은 아마 우리의 코드가 상태 기계와 일시적인 상태들로 가득차서 추상화하기보단 시뮬레이션해야 한다는 의미일 것입니다.
 
+리스트와 시퀀스는 수학자와 프로그래머가 가장 먼저 배우는 개념 중 하나일 것입니다.
 
-```
---1--2--3--4--5--6--| // terminates normally
-```
-
-Another sequence, with characters:
+여기 숫자들의 시퀀스가 있습니다:
 
 ```
---a--b--a--a--a---d---X // terminates with error
+--1--2--3--4--5--6--| // 정상적으로 종료됩니다
 ```
 
-Some sequences are finite while others are infinite, like a sequence of button taps:
+문자로 이루어진 또 다른 시퀀스입니다:
+
+```
+--a--b--a--a--a---d---X // 정상적으로 종료하지 못하고 에러가 발생합니다
+```
+
+버튼을 누르는 일과 같이 어떤 시퀀스는 한정적인 반면에, 어떤 시퀀스는 무한합니다:
 
 ```
 ---tap-tap-------tap--->
 ```
 
-These are called marble diagrams. There are more marble diagrams at [rxmarbles.com](http://rxmarbles.com).
+이것들은 마블 다이어그램이라고 부릅니다. 더 많은 마블 다이어그램들이 [rxmarbles.com](http://rxmarbles.com/)에 있습니다.
 
-If we were to specify sequence grammar as a regular expression it would look like:
+만약 시퀀스 문법을 정규식으로 표현한다면 다음과 같을 것입니다:
 
-**next* (error | completed)?**
+next (error | completed)?*
 
-This describes the following:
+이는 다음과 같은 의미를 가집니다:
 
-* **Sequences can have 0 or more elements.**
-* **Once an `error` or `completed` event is received, the sequence cannot produce any other element.**
+* **시퀀스는 0개 이상의 요소들을 가질 수 있습니다.**
 
-Sequences in Rx are described by a push interface (aka callback).
+* **`error`나 `completed` 이벤트를 받으면, 시퀀스는 더 이상 다른 요소를 만들어낼 수 없습니다.**
+
+Rx의 시퀀스는 푸시 인터페이스로 표현되기도 합니다. (콜백이라고도 하죠)
 
 ```swift
 enum Event<Element>  {
-    case next(Element)      // next element of a sequence
-    case error(Swift.Error) // sequence failed with error
-    case completed          // sequence terminated successfully
+    case next(Element)      // 시퀀스의 다음 요소
+    case error(Swift.Error) // 시퀀스에서 에러가 발생함
+    case completed          // 시퀀스가 성공적으로 종료됨
 }
 
 class Observable<Element> {
@@ -94,25 +96,25 @@ protocol ObserverType {
 }
 ```
 
-**When a sequence sends the `completed` or `error` event all internal resources that compute sequence elements will be freed.**
+**시퀀스가 `completed`나 `error` 이벤트를 내부 리소스들에 보냈을 때 그 계산된 시퀀스 요소는 해제될 것입니다.**
 
-**To cancel production of sequence elements and free resources immediately, call `dispose` on the returned subscription.**
+**시퀀스 요소가 만들어지는 것을 취소하고 리소스를 즉시 해제하고 싶다면, 반환된 구독에서 `dispose`를 호출하면 됩니다.**
 
-If a sequence terminates in finite time, not calling `dispose` or not using `disposed(by: disposeBag)` won't cause any permanent resource leaks. However, those resources will be used until the sequence completes, either by finishing production of elements or returning an error.
+만약 시퀀스가 정해진 시간에 종료된다면, `dispose`를 호출하지 않거나 `disposed(by: disposeBag)`를 사용하지 않아도 자원 누출이 일어나지 않을 것입니다. 하지만, 그 자원들은 시퀀스가 요소를 만들어내는 일을 끝내거나 에러를 발생할때까지 사용될 것입니다.
 
-If a sequence does not terminate on its own, such as with a series of button taps, resources will be allocated permanently unless `dispose` is called manually, automatically inside of a `disposeBag`, with the `takeUntil` operator, or in some other way.
+만약 시퀀스가 버튼 탭과 같이 알아서 종료되지 않는다면, 할당된 자원들은 `dispose`가 호출되거나 `disposeBag`에 담겨있거나 `takeUntil` 연산자를 사용하는 등의 방법을 쓰지 않는 한 영원히 살아있을 것입니다.
 
-**Using dispose bags or `takeUntil` operator is a robust way of making sure resources are cleaned up. We recommend using them in production even if the sequences will terminate in finite time.**
+**dispose bag이나 `takeUntil` 연산자를 쓰는 것은 리소스가 확실히 정리되는데에 확실한 방법들입니다. 심지어 시퀀스가 한정된 시간안에 끝나는 경우에도 dispose bag이나 `takeUntil` 연산자를 쓰는 것을 추천합니다.**
 
-If you are curious why `Swift.Error` isn't generic, you can find the explanation [here](DesignRationale.md#why-error-type-isnt-generic).
+왜 `Swift.Error`가 제네릭이 아닌지에 대해 궁금하다면 [여기에서](https://github.com/ReactiveX/RxSwift/blob/master/Documentation/DesignRationale.md#why-error-type-isnt-generic) 그에 대한 내용을 확인하실 수 있습니다.
 
 ## Disposing
 
-There is one additional way an observed sequence can terminate. When we are done with a sequence and we want to release all of the resources allocated to compute the upcoming elements, we can call `dispose` on a subscription.
+관찰당하고 있는 시퀀스를 종료할 수 있는 추가적인 방법이 하나 있습니다. 우리가 시퀀스로 할 일을 끝냈고 다가올 요소들을 계산하기 위해 할당된 리소스들을 모두 해제하고 싶을 때, 구독(subscription)에서 `dispose`를 호출하면 됩니다.
 
-Here is an example with the `interval` operator.
+여기 `interval` 연산자에 대한 예제입니다.
 
-```swift
+```
 let scheduler = SerialDispatchQueueScheduler(qos: .default)
 let subscription = Observable<Int>.interval(0.3, scheduler: scheduler)
     .subscribe { event in
@@ -124,7 +126,7 @@ Thread.sleep(forTimeInterval: 2.0)
 subscription.dispose()
 ```
 
-This will print:
+위의 코드는 다음과 같은 결과를 출력할 것입니다:
 
 ```
 0
@@ -135,28 +137,29 @@ This will print:
 5
 ```
 
-Note that you usually do not want to manually call `dispose`; this is only an educational example. Calling dispose manually is usually a bad code smell. There are better ways to dispose of subscriptions such as `DisposeBag`, the `takeUntil` operator, or some other mechanism.
+여러분은 수동으로 dispose를 호출하는 것을 원하지 않을 것을 압니다. 이것은 그저 교육용 예제일 뿐입니다. dispose를 수동으로 호출하는 것은 나쁜 코드의 냄새가 납니다. DisposeBag, takeUntil 연산자, 또는 다른 매커니즘과 같이 구독을 dispose하는 더 나은 방법들이 많이 있습니다.
 
-So can this code print something after the `dispose` call is executed? The answer is: it depends.
+그래서 이 무언가를 출력하는 코드는 `dispose`를 호출한 이후에 종료되나요? 대답은 상황에 따라 다르다 입니다.
 
-* If the `scheduler` is a **serial scheduler** (ex. `MainScheduler`) and `dispose` is called **on the same serial scheduler**, the answer is **no**.
+* 만약 `scheduler`가 **시리얼 스케쥴러**(예. `MainScheduler`)이고, `dispose`가 **같은 시리얼 스케쥴러에서** 호출됐다면 대답은 아니요 입니다.
 
-* Otherwise it is **yes**.
+* 다른 경우엔 모두 **예** 입니다.
 
-You can find out more about schedulers [here](Schedulers.md).
+스케쥴러에 대한 내용은 [여기서](https://github.com/ReactiveX/RxSwift/blob/master/Documentation/Schedulers.md) 더 확인하실 수 있습니다.
 
-You simply have two processes happening in parallel.
+간단하게 말하자면 여러분엔겐 평행하게 일어나고 있는 두 개의 프로세스가 있다고 생각하시면 됩니다.
 
-* one is producing elements
-* the other is disposing of the subscription
+* 하나는 요소를 만드는 것
 
-The question "Can something be printed after?" does not even make sense in the case that those processes are on different schedulers.
+* 또 다른 하나는 구독을 해제(dispose)하는 것
 
-A few more examples just to be sure (`observeOn` is explained [here](Schedulers.md)).
+"이후에 무언가가 출력되나요?"라는 질문은 이 프로세스들이 다른 스케쥴러에 있다면 의미가 없는 질문이 됩니다.
 
-In case we have something like:
+확실하게 이해하기 위한 몇 가지 예제를 보여드리겠습니다. (`observeOn`은 [여기](https://github.com/ReactiveX/RxSwift/blob/master/Documentation/Schedulers.md)에 설명돼있습니다)
 
-```swift
+아래와 같은 코드가 있다고 가정합니다:
+
+```
 let subscription = Observable<Int>.interval(0.3, scheduler: scheduler)
             .observeOn(MainScheduler.instance)
             .subscribe { event in
@@ -165,15 +168,14 @@ let subscription = Observable<Int>.interval(0.3, scheduler: scheduler)
 
 // ....
 
-subscription.dispose() // called from main thread
-
+subscription.dispose() // 메인 쓰레드에서 호출됩니다
 ```
 
-**After the `dispose` call returns, nothing will be printed. That is guaranteed.**
+**`dispose` 호출이 반환되면 아무것도 출력되지 않습니다. 이것은 보장되어있는 일입니다.**
 
-Also, in this case:
+또, 아래와 같은 경우가 있다고 가정합니다:
 
-```swift
+```
 let subscription = Observable<Int>.interval(0.3, scheduler: scheduler)
             .observeOn(serialScheduler)
             .subscribe { event in
@@ -182,33 +184,32 @@ let subscription = Observable<Int>.interval(0.3, scheduler: scheduler)
 
 // ...
 
-subscription.dispose() // executing on same `serialScheduler`
-
+subscription.dispose() // 같은 `serialScheduler`에서 실행합니다
 ```
 
-**After the `dispose` call returns, nothing will be printed. That is guaranteed.**
+**`dispose` 호출이 반환되면 아무것도 출력되지 않습니다. 이것도 보장되어있는 일입니다.**
 
 ### Dispose Bags
 
-Dispose bags are used to return ARC like behavior to RX.
+Dispose Bag은 Rx에서 ARC와 비슷한 역할을 합니다.
 
-When a `DisposeBag` is deallocated, it will call `dispose` on each of the added disposables.
+`DisposeBag`이 해제됐을 때, 추가된 disposables들 모두에게 `dispose`를 호출합니다.
 
-It does not have a `dispose` method and therefore does not allow calling explicit dispose on purpose. If immediate cleanup is required, we can just create a new bag.
+그 자체에는 `dispose` 메소드가 없어서 다른 목적으로 예외적인 호출은 불가능합니다. 즉각적인 정리가 필요하다면 새로운 가방을 만들면 됩니다.
 
-```swift
+```
   self.disposeBag = DisposeBag()
 ```
 
-This will clear old references and cause disposal of resources.
+위의 코드는 오래된 참조들을 정리해주고 자원들이 해제되도록 합니다.
 
-If that explicit manual disposal is still wanted, use `CompositeDisposable`. **It has the wanted behavior but once that `dispose` method is called, it will immediately dispose any newly added disposable.**
+만약 예외적인 수동의 해제가 여전히 필요하다면, `CompositeDisposable`을 사용해보세요. **CompositeDisposable은 원하는 기능을 가지고 있을것이지만 `dispose`가 호출됐을 때 새롭게 추가된 disposable도 즉시 해제시켜 버립니다.**
 
 ### Take until
 
-Additional way to automatically dispose subscription on dealloc is to use `takeUntil` operator.
+dealloc시에 구독을 자동으로 해제하는 또 다른 방법으론 `takeUntil` 연산자를 사용하는 방법이 있습니다.
 
-```swift
+```
 sequence
     .takeUntil(self.rx.deallocated)
     .subscribe {
@@ -217,42 +218,43 @@ sequence
 ```
 
 ## Implicit `Observable` guarantees
+### 내장된 `Observable`에 대해 보증된 사항들
 
-There is also a couple of additional guarantees that all sequence producers (`Observable`s) must honor.
+모든 시퀀스 생성자들(`Observables`)이 지켜야하는 추가적인 규칙들이 있습니다.
 
-It doesn't matter on which thread they produce elements, but if they generate one element and send it to the observer `observer.on(.next(nextElement))`, they can't send next element until `observer.on` method has finished execution.
+어떤 쓰레드에서 요소를 만들던지 상관없지만 그것들이 요소 하나를 만든 후에 옵저버인 `observer.on(.next(nextElement))` 에 보냈다면, `observer.on` 메소드가 실행을 마칠때까지 다음 요소를 보낼 수 없습니다.
 
-Producers also cannot send terminating `.completed` or `.error` in case `.next` event hasn't finished.
+생성자들은 또한 `.completed` 나 `.error` 를 `.next` 이벤트가 끝나지 않았을 때 보내서 종료할 수 없습니다.
 
-In short, consider this example:
+요약하자면, 아래의 예제와 같을 것입니다:
 
-```swift
+```
 someObservable
   .subscribe { (e: Event<Element>) in
-      print("Event processing started")
-      // processing
-      print("Event processing ended")
+      print("이벤트 처리 시작")
+      // 처리중
+      print("이벤트 처리 끝")
   }
 ```
 
-This will always print:
+위의 코드는 아래와 같은 결과를 항상 출력할 것입니다:
 
 ```
-Event processing started
-Event processing ended
-Event processing started
-Event processing ended
-Event processing started
-Event processing ended
+이벤트 처리 시작
+이벤트 처리 끝
+이벤트 처리 시작
+이벤트 처리 끝
+이벤트 처리 시작
+이벤트 처리 끝
 ```
 
-It can never print:
+절대 아래와 같이 출력될 수는 없습니다:
 
 ```
-Event processing started
-Event processing started
-Event processing ended
-Event processing ended
+이벤트 처리 시작
+이벤트 처리 시작
+이벤트 처리 끝
+이벤트 처리 끝
 ```
 
 ## Creating your own `Observable` (aka observable sequence)
