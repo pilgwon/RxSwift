@@ -496,10 +496,10 @@ Ended ----
 
 그러기 위해 정의해야 할 게 두 가지가 있습니다.
 
-* How to handle past elements that have been received before the new subscriber was interested in observing them (replay latest only, replay all, replay last n)
-* How to decide when to fire that shared subscription (refCount, manual or some other algorithm)
+* 새로운 구독자가 관찰하고 싶어하기 전에 받은 과거의 요소들은 어떻게 관리할 것인가 (replay latest only, replay all, replay last n)
+* 그 공유된 구독은 언제 발생시킬 것인가 (레퍼런스 카운트, 수동 혹은 다른 알고리즘)
 
-The usual choice is a combination of `replay(1).refCount()` aka `shareReplay()`.
+보통은 `replay(1).refCount()` 즉, `shareReplay()` 조합을 선택합니다.
 
 ```swift
 let counter = myInterval(0.1)
@@ -527,7 +527,7 @@ subscription2.dispose()
 print("Ended ----")
 ```
 
-This will print
+이는 다음과 같은 결과를 출력할 것입니다.
 
 ```
 Started ----
@@ -552,11 +552,11 @@ Disposed
 Ended ----
 ```
 
-Notice how now there is only one `Subscribed` and `Disposed` event.
+`Subscribed` 와 `Disposed` 이벤트가 딱 하나씩 있을 때 어떻게 되는지 기억하세요.
 
-Behavior for URL observables is equivalent.
+URL 옵저버블에 대한 행동은 동일합니다.
 
-This is how HTTP requests are wrapped in Rx. It's pretty much the same pattern like the `interval` operator.
+다음은 HTTP 리퀘스트가 어떻게 Rx로 감싸지는 지에 대한 내용입니다. `interval` 연산자의 패턴과 꽤나 비슷합니다.
 
 ```swift
 extension Reactive where Base: URLSession {
