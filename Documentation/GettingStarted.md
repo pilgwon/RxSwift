@@ -369,11 +369,13 @@ second
 Ended ----
 ```
 
-## Creating an `Observable` that performs work
+# 
 
-Ok, now something more interesting. Let's create that `interval` operator that was used in previous examples.
+## 작동하는 `옵저버블` 만들기
 
-*This is equivalent of actual implementation for dispatch queue schedulers*
+이제 좀 더 흥미로운 걸 해보겠습니다. 이전 예제에서 사용했던 `interval` 연산자를 만들 것입니다.
+
+*이는 디스패치 큐 스케쥴러의 실제 구현 방식과 동일합니다*
 
 ```swift
 func myInterval(_ interval: TimeInterval) -> Observable<Int> {
@@ -420,7 +422,7 @@ subscription.dispose()
 print("Ended ----")
 ```
 
-This will print
+위의 코드는 다음과 같은 결과를 출력할 것입니다.
 ```
 Started ----
 Subscribed
@@ -433,7 +435,7 @@ Disposed
 Ended ----
 ```
 
-What if you would write
+아래와 같이 입력하신다면
 
 ```swift
 let counter = myInterval(0.1)
@@ -460,7 +462,7 @@ subscription2.dispose()
 print("Ended ----")
 ```
 
-This would print:
+다음과 같이 출력될 것입니다.
 
 ```
 Started ----
@@ -486,7 +488,7 @@ Disposed
 Ended ----
 ```
 
-**Every subscriber upon subscription usually generates it's own separate sequence of elements. Operators are stateless by default. There are vastly more stateless operators than stateful ones.**
+**구독하고 있는 모든 것은 자신만의 개별 요소들의 시퀀스를 만듭니다. 연산자들은 기본적으로 상태가 없습니다. 상태가 있는 연산자보다 상태가 없는 연산자가 광대하게 많습니다.**
 
 ## Sharing subscription and `shareReplay` operator
 
