@@ -490,11 +490,11 @@ Ended ----
 
 **구독하고 있는 모든 것은 자신만의 개별 요소들의 시퀀스를 만듭니다. 연산자들은 기본적으로 상태가 없습니다. 상태가 있는 연산자보다 상태가 없는 연산자가 광대하게 많습니다.**
 
-## Sharing subscription and `shareReplay` operator
+## 구독 공유와 `shareReplay` 연산자
 
-But what if you want that multiple observers share events (elements) from only one subscription?
+그런데 여러분이 여러개의 관찰자가 하나의 구독에서 다같이 이벤트를 공유하려 한다면 어떨까요?
 
-There are two things that need to be defined.
+그러기 위해 정의해야 할 게 두 가지가 있습니다.
 
 * How to handle past elements that have been received before the new subscriber was interested in observing them (replay latest only, replay all, replay last n)
 * How to decide when to fire that shared subscription (refCount, manual or some other algorithm)
