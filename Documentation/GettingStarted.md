@@ -587,29 +587,29 @@ extension Reactive where Base: URLSession {
 }
 ```
 
-## Operators
+## 연산자
 
-There are numerous operators implemented in RxSwift.
+RxSwift에는 수많은 연산자가 존재합니다.
 
-Marble diagrams for all operators can be found on [ReactiveX.io](http://reactivex.io/)
+모든 연산자의 마블 다이어그램은 [ReactiveX.io](http://reactivex.io/)에서 확인하실 수 있습니다.
 
-Almost all operators are demonstrated in [Playgrounds](../Rx.playground).
+거의 모든 연산자가 [Playgrounds](../Rx.playground)에서 증명이 됩니다.
 
-To use playgrounds please open `Rx.xcworkspace`, build `RxSwift-macOS` scheme and then open playgrounds in `Rx.xcworkspace` tree view.
+플레이그라운드를 사용하시려면 `Rx.xcworkspace` 를 열고, `RxSwift-macOS` 스킴을 빌드하신 다음에 `Rx.xcworkspace` 의 트리 뷰에 있는 플레이그라운드를 열면됩니다.
 
-In case you need an operator, and don't know how to find it there a [decision tree of operators](http://reactivex.io/documentation/operators.html#tree).
+연산자가 필요한데 어떤 것을 써야할 지 모르겠을 때는 [연산자 결정에 도움을 주는 트리](http://reactivex.io/documentation/operators.html#tree)를 사용해보세요.
 
-### Custom operators
+### 커스텀 연산자
 
-There are two ways how you can create custom operators.
+커스텀 연산자를 만드는 방법은 두 가지가 있습니다.
 
-#### Easy way
+#### 쉬운 방법
 
-All of the internal code uses highly optimized versions of operators, so they aren't the best tutorial material. That's why it's highly encouraged to use standard operators.
+모든 내부의 코드들은 극도로 최적화된 버전의 연산자를 사용합니다. 그래서 그것들은 좋은 튜토리얼의 예가 아닙니다. 그것이 표준 연산자를 주로 예를 드는 이유입니다.
 
-Fortunately there is an easier way to create operators. Creating new operators is actually all about creating observables, and previous chapter already describes how to do that.
+운좋게도 연산자를 만드는 쉬운 방법이 존재합니다. 새로운 연산자를 만드는 것은 사실 새로운 옵저버블을 만드는 것이라고 할 수 있습니다. 그리고 전 챕터에서 그 방법을 이미 설명했습니다.
 
-Lets see how an unoptimized map operator can be implemented.
+최적화되지 못한 map 연산자는 어떻게 구현할 수 있는지 알아봅시다.
 
 ```swift
 extension ObservableType {
@@ -633,7 +633,7 @@ extension ObservableType {
 }
 ```
 
-So now you can use your own map:
+이제 여러분만의 map을 사용하실 수 있게 되었습니다.
 
 ```swift
 let subscription = myInterval(0.1)
@@ -645,7 +645,7 @@ let subscription = myInterval(0.1)
     })
 ```
 
-This will print:
+이 코드는 다음과 같은 결과를 출력할 것입니다:
 
 ```
 Subscribed
@@ -661,34 +661,34 @@ This is simply 8
 ...
 ```
 
-### Life happens
+### 엄청난 변화
 
-So what if it's just too hard to solve some cases with custom operators? You can exit the Rx monad, perform actions in imperative world, and then tunnel results to Rx again using `Subject`s.
+커스텀 연산자로도 해결하기 어려운 문제가 나타난다면 어떡할까요? 그럴땐 Rx 세계를 떠나서 `Subject`를 사용하여 실제 세계에서 액션을 취한 후에 결과를 Rx로 돌려보내면 됩니다.
 
-This isn't something that should be practiced often, and is a bad code smell, but you can do it.
+이것은 아주 나쁜 코드의 냄새가 나기 때문에 아래와 같이 고칠 수 있습니다.
 
 ```swift
   let magicBeings: Observable<MagicBeing> = summonFromMiddleEarth()
 
   magicBeings
-    .subscribe(onNext: { being in     // exit the Rx monad
+    .subscribe(onNext: { being in     // Rx 세계를 떠납니다
         self.doSomeStateMagic(being)
     })
     .disposed(by: disposeBag)
 
   //
-  //  Mess
+  //  다른 세계
   //
-  let kitten = globalParty(   // calculate something in messy world
+  let kitten = globalParty(   // 복잡한 세계에서 무언가를 계산합니다
     being,
     UIApplication.delegate.dataSomething.attendees
   )
-  kittens.on(.next(kitten))   // send result back to rx
+  kittens.on(.next(kitten))   // 결과를 Rx로 다시 보냅니다
   //
-  // Another mess
+  // 또 다른 세계
   //
 
-  let kittens = Variable(firstKitten) // again back in Rx monad
+  let kittens = Variable(firstKitten) // Rx 세계로 다시 돌아옵니다
 
   kittens.asObservable()
     .map { kitten in
@@ -697,7 +697,7 @@ This isn't something that should be practiced often, and is a bad code smell, bu
     // ....
 ```
 
-Every time you do this, somebody will probably write this code somewhere:
+여러분이 이런 코드를 어딘가에 쓸 때, 누군가는 아래와 같이 사용할 것입니다:
 
 ```swift
   kittens
@@ -707,15 +707,15 @@ Every time you do this, somebody will probably write this code somewhere:
     .disposed(by: disposeBag)
 ```
 
-So please try not to do this.
+그러니 따라하지 마십시오.
 
-## Playgrounds
+## 플레이그라운드
 
-If you are unsure how exactly some of the operators work, [playgrounds](../Rx.playground) contain almost all of the operators already prepared with small examples that illustrate their behavior.
+만약 여러분이 몇몇 연산자가 어떻게 작동하는지 잘 모르시겠다면, [playgrounds](../Rx.playground)에 모든 연산자와 그것들의 사용 예제까지 준비되어 있습니다.
 
-**To use playgrounds please open Rx.xcworkspace, build RxSwift-macOS scheme and then open playgrounds in Rx.xcworkspace tree view.**
+**플레이그라운드를 사용하시려면 Rx.xcworkspace를 열고 RxSwift-macOS 스킴을 빌드한 후에 Rx.xcworkspace 트리 뷰의 플레이그라운드를 여세요.**
 
-**To view the results of the examples in the playgrounds, please open the `Assistant Editor`. You can open `Assistant Editor` by clicking on `View > Assistant Editor > Show Assistant Editor`**
+**플레이그라운드 예제들의 결과를 보려면 `Assistant Editor` 를 열면 됩니다. `Assistant Editor` 는 `View > Assistant Editor > Show Assistant Editor` 를 클릭하시면 열 수 있습니다.**
 
 ## Error handling
 
