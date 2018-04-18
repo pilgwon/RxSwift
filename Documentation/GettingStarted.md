@@ -717,21 +717,21 @@ This is simply 8
 
 **플레이그라운드 예제들의 결과를 보려면 `Assistant Editor` 를 열면 됩니다. `Assistant Editor` 는 `View > Assistant Editor > Show Assistant Editor` 를 클릭하시면 열 수 있습니다.**
 
-## Error handling
+## 에러 핸들링
 
-There are two error mechanisms.
+에러 메커니즘은 두 가지가 있습니다.
 
-### Asynchronous error handling mechanism in observables
+### 옵저버블에서의 비동기 에러 핸들링 메커니즘
 
-Error handling is pretty straightforward. If one sequence terminates with error, then all of the dependent sequences will terminate with error. It's usual short circuit logic.
+에러 핸들링은 꽤 간단합니다. 만약 한 시퀀스에서 에러가 발생했다면 모든 독립 시퀀스는 에러를 발생시킬 것입니다. 이것은 보통의 짧은 서킷 로직입니다.
 
-You can recover from failure of observable by using `catch` operator. There are various overloads that enable you to specify recovery in great detail.
+`catch` 연산자를 사용하면 옵저버블의 실패를 복구시킬 수 있습니다. 엄청난 디테일의 특정한 부분을 복구할 수 있는 다양한 오버로드도 있습니다.
 
-There is also `retry` operator that enables retries in case of errored sequence.
+또한 `retry` 연산자를 사용하면 에러가 난 시퀀스를 다시 시도하게도 할 수 있습니다.
 
-## Debugging Compile Errors
+## 컴파일 에러 디버깅하기
 
-When writing elegant RxSwift/RxCocoa code, you are probably relying heavily on compiler to deduce types of `Observable`s. This is one of the reasons why Swift is awesome, but it can also be frustrating sometimes.
+엘레강스한 RxSwift/RxCocoa 코드를 작성할 때, 여러분은 `Observable`의 타입을 추론하기 위해 아마 컴파일러에 엄청나게 의존할 것입니다. 이건 Swift가 대단한 이유 중 하나이지만, 가끔씩 좌절감을 주기도 합니다.
 
 ```swift
 images = word
@@ -744,7 +744,7 @@ images = word
       }
 ```
 
-If compiler reports that there is an error somewhere in this expression, I would suggest first annotating return types.
+만약 컴파일러가 위의 코드에 에러가 있다고 보고한다면, 첫번째 반환 타입을 지정해주는 것을 추천드립니다.
 
 ```swift
 images = word
@@ -757,7 +757,7 @@ images = word
       }
 ```
 
-If that doesn't work, you can continue adding more type annotations until you've localized the error.
+만약 작동하지 않는다면, 에러를 찾아낼 때까지 더 많은 타입을 지정하면 됩니다.
 
 ```swift
 images = word
@@ -770,15 +770,15 @@ images = word
       }
 ```
 
-**I would suggest first annotating return types and arguments of closures.**
+**저는 클로저의 첫번째 반환 타입과 변수를 지정하는 것을 추천드립니다.**
 
-Usually after you have fixed the error, you can remove the type annotations to clean up your code again.
+보통 에러를 수정하고 난 후엔 지정해놓은 타입을 삭제하고 코드 정리를 하시면 됩니다.
 
-## Debugging
+## 디버깅
 
-Using debugger alone is useful, but usually using `debug` operator will be more efficient. `debug` operator will print out all events to standard output and you can add also label those events.
+디버거만 사용하는 것은 유용하지만 `debug` 연산자를 사용하면 더욱 효율적일 것입니다. `debug` 연산자는 표준 출력의 모든 이벤트를 출력하고 그 이벤트들에 대한 설명도 출력합니다.
 
-`debug` acts like a probe. Here is an example of using it:
+아래의 예제를 보면 `debug`는 조사하는 것처럼 작동됩니다.
 
 ```swift
 let subscription = myInterval(0.1)
@@ -795,7 +795,7 @@ Thread.sleepForTimeInterval(0.5)
 subscription.dispose()
 ```
 
-will print
+위의 코드는 아래와 같이 출력할 것입니다.
 
 ```
 [my probe] subscribed
@@ -814,7 +814,7 @@ This is simply 4
 Disposed
 ```
 
-You can also easily create your version of the `debug` operator.
+또한 여러분만의 버전인 `debug` 연산자를 쉽게 만들 수 있습니다.
 
 ```swift
 extension ObservableType {
@@ -843,12 +843,13 @@ extension ObservableType {
  }
  ```
 
-### Enabling Debug Mode
-In order to [Debug memory leaks using `RxSwift.Resources`](#debugging-memory-leaks) or [Log all HTTP requests automatically](#logging-http-traffic), you have to enable Debug Mode.
+### 디버그 모드 켜기
 
-In order to enable debug mode, a `TRACE_RESOURCES` flag must be added to the RxSwift target build settings, under _Other Swift Flags_.
+`RxSwift.Resources`를 사용해서 [메모리 릭 디버깅하기](#debugging-memory-leaks) 또는 [모든 HTTP 리퀘스트들을 자동으로 로깅](#logging-http-traffic)하기를 위해서, 우선 디버그 모드를 켜야합니다.
 
-For further discussion and instructions on how to set the `TRACE_RESOURCES` flag for Cocoapods & Carthage, see [#378](https://github.com/ReactiveX/RxSwift/issues/378)
+디버그 모드를 작동시키려면 `TRACE_RESOURCES` 플래그가 RxSwift 타겟 빌드 세팅의 _Other Swift Flags_ 에 추가돼 있어야 합니다.
+
+Cocoapods과 Carthage를 위한 `TRACE_RESOURCES` 플래스 설정법에 대해 더 알고 싶으시다면 [#378](https://github.com/ReactiveX/RxSwift/issues/378)을 보세요.
 
 ## Debugging memory leaks
 
