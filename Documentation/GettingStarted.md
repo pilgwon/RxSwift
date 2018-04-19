@@ -851,14 +851,14 @@ extension ObservableType {
 
 Cocoapods과 Carthage를 위한 `TRACE_RESOURCES` 플래스 설정법에 대해 더 알고 싶으시다면 [#378](https://github.com/ReactiveX/RxSwift/issues/378)을 보세요.
 
-## Debugging memory leaks
+## 메모리 누수 디버깅하기
 
-In debug mode Rx tracks all allocated resources in a global variable `Resources.total`.
+Rx의 디버그 모드에선 글로벌 변수인 `Resources.total` 에 할당된 모든 자원을 추적합니다.
 
-In case you want to have some resource leak detection logic, the simplest method is just printing out `RxSwift.Resources.total` periodically to output.
+만약 여러분이 자원 누수 탐지 로직을 원한다면, 가장 간단한 방법은 `RxSwift.Resources.total` 을 주기적으로 출력해보는 것입니다.
 
 ```swift
-    /* add somewhere in
+    /* 아래 함수의 어딘가에 추가하세요
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey : Any]? = nil)
     */
     _ = Observable<Int>.interval(1, scheduler: MainScheduler.instance)
@@ -867,28 +867,27 @@ In case you want to have some resource leak detection logic, the simplest method
         })
 ```
 
-Most efficient way to test for memory leaks is:
-* navigate to your screen and use it
-* navigate back
-* observe initial resource count
-* navigate second time to your screen and use it
-* navigate back
-* observe final resource count
+메모리 누수를 테스트하기 위한 가장 효과적인 방법은 다음과 같습니다.
+* 원하는 화면으로 가서 작동한다
+* 뒤로 돌아간다
+* 초기 자원 갯수를 관찰한다
+* 다시 그 화면으로 돌아가서 같은 작업을 한다
+* 뒤로 돌아간다
+* 마지막 자원 갯수를 관찰한다
 
-In case there is a difference in resource count between initial and final resource counts, there might be a memory
-leak somewhere.
+만약 처음과 끝의 자원 갯수가 다르다면, 어디선가 메모리 누수가 나고 있다는 뜻입니다.
 
-The reason why 2 navigations are suggested is because first navigation forces loading of lazy resources.
+네비게이션을 하나가 아닌 둘로 확인하는 것을 추천하는 이유는 첫번째 네비게이션은 자원을 게으르게 불러오도록 강요하기 때문입니다.
 
 ## Variables
 
-`Variable`s represent some observable state. `Variable` without containing value can't exist because initializer requires initial value.
+`Variable` 는 관찰가능한 상태를 표시합니다. `Variable` 은 초기값을 필수로 하기 때문에 값이 없다면 존재할 수 없습니다.
 
-Variable wraps a [`Subject`](http://reactivex.io/documentation/subject.html). More specifically it is a `BehaviorSubject`.  Unlike `BehaviorSubject`, it only exposes `value` interface, so variable can never terminate with error.
+Variable은 [`Subject`](http://reactivex.io/documentation/subject.html)를 감쌉니다. 더 자세하게 말하자면 `BehaviorSubject` 를 감쌉니다. `BehaviorSubject` 와는 다르게, 오직 `value` 인터페이스를 표시하며, 그래서 variable은 절대 에러로 인한 종료가 일어나지 않습니다.
 
-It will also broadcast its current value immediately on subscription.
+또한 variable을 구독하면 그것의 현재 값을 즉시 알려줍니다.
 
-After variable is deallocated, it will complete the observable sequence returned from `.asObservable()`.
+variable이 해제되면, `.asObservable()` 에서 반환된 옵저버블 시퀀스를 완료할 것입니다.
 
 ```swift
 let variable = Variable(0)
@@ -922,7 +921,7 @@ variable.value = 2
 print("End ---")
 ```
 
-will print
+위의 코드는 다음과 같은 결과를 출력할 것입니다.
 
 ```
 Before first subscription ---
@@ -941,9 +940,9 @@ Completed 2
 
 ## KVO
 
-KVO is an Objective-C mechanism. That means that it wasn't built with type safety in mind. This project tries to solve some of the problems.
+KVO는 Objective-C의 메커니즘입니다. 즉, 타입 안정성을 생각하지 않고 만들어졌다는 것을 뜻합니다. 이 프로젝트에선 그러한 문제점을 해결하기 위한 시도를 했습니다.
 
-There are two built in ways this library supports KVO.
+이 라이브러리가 KVO를 지원하는 것에는 두 가지 방법이 있습니다.
 
 ```swift
 // KVO
@@ -959,9 +958,9 @@ extension Reactive where Base: NSObject {
 #endif
 ```
 
-Example how to observe frame of `UIView`.
+예를 들어 `UIView`의 frame을 관찰하는 법을 알아보겠습니다.
 
-**WARNING: UIKit isn't KVO compliant, but this will work.**
+**경고: UIKit은 KVO를 따르지 않지만, 아래 코드는 잘 작동합니다.**
 
 ```swift
 view
@@ -971,7 +970,7 @@ view
   })
 ```
 
-or
+또는
 
 ```swift
 view
