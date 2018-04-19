@@ -982,13 +982,13 @@ view
 
 ### `rx.observe`
 
-`rx.observe` is more performant because it's just a simple wrapper around KVO mechanism, but it has more limited usage scenarios
+`rx.observe` 는 KVO 메커니즘을 덮는 간단한 래퍼이기 때문에 더 효율적입니다. 하지만 사용하는 방법에는 제한이 있습니다.
 
-* it can be used to observe paths starting from `self` or from ancestors in ownership graph (`retainSelf = false`)
-* it can be used to observe paths starting from descendants in ownership graph (`retainSelf = true`)
-* the paths have to consist only of `strong` properties, otherwise you are risking crashing the system by not unregistering KVO observer before dealloc.
+* `self` 또는 오너십 그래프에서의 조상에게서 시작하는 경로를 관찰하는데만 사용할 수 있습니다. (`retainSelf = false`)
+* 오너십 그래프에서의 후손에게서 시작하는 경로를 관찰하는데만 사용할 수 있습니다. (`retainSelf = true`)
+* 경로는 오로지 `strong` 속성만 가지고 있어야 하며, 그렇지 않으면 등록되지 않은 KVO 관찰자를 통해 시스템에 크래쉬가 날 수 있습니다.
 
-E.g.
+예를 들면 다음과 같습니다.
 
 ```swift
 self.rx.observe(CGRect.self, "view.frame", retainSelf: false)
