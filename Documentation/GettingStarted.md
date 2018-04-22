@@ -1014,38 +1014,58 @@ someSuspiciousViewController.rx.observeWeakly(Bool.self, "behavingOk")
 KVO is an Objective-C mechanism so it relies heavily on `NSValue`.
 
 **RxCocoa has built in support for KVO observing of `CGRect`, `CGSize` and `CGPoint` structs.**
+### `rx.observeWeakly`
 
-When observing some other structures it is necessary to extract those structures from `NSValue` manually.
+`rx.observeWeakly` 는 `rx.observe` 보다는 조금 약합니다. 왜냐하면 약한 참조하는 객체의 해제를 다루기 위해 만들어졌기 때문입니다.
 
-[Here](../RxCocoa/Foundation/KVORepresentable+CoreGraphics.swift) are examples how to extend KVO observing mechanism and `rx.observe*` methods for other structs by implementing `KVORepresentable` protocol.
+게다가 `rx.observe` 가 쓰이는 모든 곳에서 쓰일 수 있고 추가적으로 다음과 같은 경우에 사용할 수 있습니다.
 
-## UI layer tips
+* 관찰하고 있는 대상을 갖고 있지 않기 때문에, 오너쉽 관계를 잘 모르는 임의의 객체 그래프를 관찰할 때도 사용할 수 있습니다.
+* `weak` 속성도 관찰할 수 있습니다.
 
-There are certain things that your `Observable`s need to satisfy in the UI layer when binding to UIKit controls.
+예를 들면 다음과 같습니다.
 
-### Threading
+```swift
+someSuspiciousViewController.rx.observeWeakly(Bool.self, "behavingOk")
+```
 
-`Observable`s need to send values on `MainScheduler`(UIThread). That's just a normal UIKit/Cocoa requirement.
+### 구조체 관찰하기
 
-It is usually a good idea for your APIs to return results on `MainScheduler`. In case you try to bind something to UI from background thread, in **Debug** build RxCocoa will usually throw an exception to inform you of that.
+KVO는 Objective-C의 메커니즘이라 `NSValue` 에 강하게 의존하고 있습니다.
 
-To fix this you need to add `observeOn(MainScheduler.instance)`.
+**RxCocoa는 `CGRect`, `CGSize` 그리고 `CGPoint` 구조체를 관찰하기 위한 KVO 지원을 위해 만들어졌습니다.**
 
-**URLSession extensions don't return result on `MainScheduler` by default.**
+다른 구조체를 관찰할 땐 `NSValue` 에서 구조체를 수동으로 추출해야 할 필요가 있습니다.
 
-### Errors
+[여기](../RxCocoa/Foundation/KVORepresentable+CoreGraphics.swift)에 KVO 관찰 메커니즘을 확장하고 `rx.observe*` 메소드를 다른 구조체를 위해 `KVORepresentable` 프로토콜로 구현하는 방법에 대한 예제들이 있습니다.
 
-You can't bind failure to UIKit controls because that is undefined behavior.
+## UI 레이어 팁
 
-If you don't know if `Observable` can fail, you can ensure it can't fail using `catchErrorJustReturn(valueThatIsReturnedWhenErrorHappens)`, **but after an error happens the underlying sequence will still complete**.
+UIKit 컨트롤들을 바인딩할 때 여러분의 `Observable` 이 UI 레이어에서 만족해야할 규칙이 있습니다.
 
-If the wanted behavior is for underlying sequence to continue producing elements, some version of `retry` operator is needed.
+### 쓰레딩
 
-### Sharing subscription
+`Observable` 은 `MainScheduler`(UIThread)에서 값을 보내야 합니다. 이건 모든 UIKit/Cocoa에서의 필수 사항입니다.
 
-You usually want to share subscription in the UI layer. You don't want to make separate HTTP calls to bind the same data to multiple UI elements.
+보통 여러분의 API가 결과를 `MainScheduler` 에서 반환하도록 하는 것은 좋은 아이디어입니다. 백그라운드 쓰레드에서 무언가를 UI에 바인딩하려고 할 때, RxCocoa **디버그** 빌드는 아마 이 부분에 대해 알려주기 위해 예외를 반환할 것입니다.
 
-Let's say you have something like this:
+이걸 해결하려면 `observeOn(MainScheduler.instance)` 를 추가해야 합니다.
+
+**URLSession 익스텐션은 기본적으론 `MainScheduler` 에서 값을 반환하지 않습니다.**
+
+### 에러
+
+UIKit 컨트롤엔 실패가 정해지지 않은 행동이기 때문에 바인딩 할 수 없습니다.
+
+`Observable` 이 실패할 수 있는지 모르겠다면, `catchErrorJustReturn(valueThatIsReturnedWhenErrorHappens)` 를 통해 실패할 수 없음을 보증할 수 있습니다. **하지만 에러가 발생한 이후에도 깔려있는 시퀀스는 여전히 완료될 것입니다.**
+
+만약 깔려있는 시퀀스에 기대했던 행동이 계속해서 요소를 만들어내는 것이었다면, 몇 가지 종류의 `retry` 연산자가 필요하실 것 같습니다.
+
+### 구독 공유
+
+여러분은 UI 레이어단에서 구독을 공유하고 싶으실 수 있습니다. 같은 데이터를 여러 UI 요소들에 바인딩하기 위해 각각의 독립적인 HTTP 호출을 원하지 않을 것입니다.
+
+다음과 같이 코드가 있다고 해봅시다:
 
 ```swift
 let searchResults = searchText
@@ -1054,10 +1074,10 @@ let searchResults = searchText
     .flatMapLatest { query in
         API.getSearchResults(query)
             .retry(3)
-            .startWith([]) // clears results on new search term
+            .startWith([]) // 새로운 검색 용어가 나오면 결과를 삭제합니다
             .catchErrorJustReturn([])
     }
-    .shareReplay(1)              // <- notice the `shareReplay` operator
+    .shareReplay(1)              // <- `shareReplay` 연산자를 기억해두세요
 ```
 
 What you usually want is to share search results once calculated. That is what `shareReplay` means.
