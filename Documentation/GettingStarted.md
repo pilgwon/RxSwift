@@ -1080,7 +1080,7 @@ let searchResults = searchText
     .shareReplay(1)              // <- `shareReplay` 연산자를 기억해두세요
 ```
 
-What you usually want is to share search results once calculated. That is what `shareReplay` means.
+보통 여러분이 원하는 것은 계산된 검색 결과를 공유하는 것일겁니다. 이게 바로 `shareReplay` 의 의미입니다.
 
 **It is usually a good rule of thumb in the UI layer to add `shareReplay` at the end of transformation chain because you really want to share calculated results. You don't want to fire separate HTTP connections when binding `searchResults` to multiple UI elements.**
 
