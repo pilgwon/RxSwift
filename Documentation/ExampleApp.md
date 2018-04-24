@@ -1,12 +1,12 @@
 
 ## RxExamples
 
-To run the example app:
+예제 앱 시작하는 법:
 
-* Open `Rx.xcworkspace`
-* Choose one of example schemes (RxExample-iOS, RxExample-OSX) and hit `Run`.
+* `Rx.xcworkspace`를 엽니다.
+* 예제 스킴(RxExample-iOS, RxExample-OSX) 중 하나를 선택하고 `Run` 버튼을 클릭합니다.
 
-You can also run the example app using CocoaPods.
+CocoaPods을 통해서도 예제를 보실 수 있습니다.
 
 ```
 pod try RxSwift
