@@ -1,13 +1,13 @@
 Examples
 ========
 
-1. [Calculated variable](#calculated-variable)
-1. [Simple UI bindings](#simple-ui-bindings)
-1. [Automatic input validation](#automatic-input-validation)
-1. [more examples](../RxExample)
-1. [Playgrounds](Playgrounds.md)
+1. [계산된 변수 (Calculated variable)](#계산된-변수)
+1. [간단한 UI 바인딩 (Simple UI bindings)](#간단한-UI-바인딩)
+1. [자동 입력 유효성 확인 (Automatic input validation)](#자동-입력-유효성-확인)
+1. [더 많은 예제](../RxExample)
+1. [플레이그라운드](Playgrounds.md)
 
-## Calculated variable
+## 계산된 변수
 
 First, let's start with some imperative code.
 The purpose of this example is to bind the identifier `c` to a value calculated from `a` and `b` if some condition is satisfied.
@@ -70,7 +70,7 @@ b.value = -8                                 // doesn't print anything
 // and `{ print($0) }` won't be called.
 ```
 
-## Simple UI bindings
+## 간단한 UI 바인딩
 
 * Instead of binding to variables, let's bind to `UITextField` values using the `rx.text` property
 * Next, `map` the `String` into an `Int` and determine if the number is prime using an async API
@@ -96,7 +96,7 @@ subscription.dispose()
 
 All of the operators used in this example are the same operators used in the first example with variables. There's nothing special about it.
 
-## Automatic input validation
+## 자동 입력 유효성 확인
 
 If you are new to Rx, the next example will probably be a little overwhelming at first. However, it's here to demonstrate how RxSwift code looks in the real-world.
 
