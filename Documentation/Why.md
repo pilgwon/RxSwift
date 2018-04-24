@@ -152,17 +152,17 @@ searchTextField.rx.text
 
 추가적인 플래그나 필드는 더 이상 필요없습니다. Rx는 임시적이고 지저분한 모든 것을 관리해줍니다.
 
-### Compositional disposal
+### 구성 요소 배치
 
-Let's assume that there is a scenario where you want to display blurred images in a table view. First, the images should be fetched from a URL, then decoded and then blurred.
+블러 이미지를 테이블 뷰에 보여주려고 한다는 시나리오를 가정해봅시다. 먼저, 이미지는 URL로 부터 가져올 것이고, 디코딩되고, 블러 작업을 거칠 것입니다.
 
-It would also be nice if that entire process could be canceled if a cell exits the visible table view area since bandwidth and processor time for blurring are expensive.
+블러 작업에드는 작업 비용은 꽤나 크기때문에 이미지가 그려질 셀이 화면에서 나가면 모든 처리 과정이 중단될 수 있으면 더욱 좋을 것입니다.
 
-It would also be nice if we didn't just immediately start to fetch an image once the cell enters the visible area since, if user swipes really fast, there could be a lot of requests fired and canceled.
+그리고 셀이 화면에 보여졌다고 바로 이미지를 불러오는 작업을 하지 않아야 할 것입니다. 사용자가 매우 빠르게 스와이프하고 있을 수도 있는데 그럴 경우엔 아주 많은 리퀘스트들이 발생했다가 취소되는 현상이 일어날 것이기 때문입니다.
 
-It would be also nice if we could limit the number of concurrent image operations because, again, blurring images is an expensive operation.
+게다가 동시에 불러올 수 있는 이미지의 숫자도 제한할 수 있다면 좋을 것입니다. 다시 한 번 말하자면, 이미지 블러 작업은 매우 큰 비용의 작업이기 때문입니다.
 
-This is how we can do it using Rx:
+위의 내용을 Rx로 만든다면 다음과 같습니다:
 
 ```swift
 // this is a conceptual solution
@@ -182,13 +182,13 @@ let imageSubscription = imageURLs
     .disposed(by: reuseDisposeBag)
 ```
 
-This code will do all that and, when `imageSubscription` is disposed, it will cancel all dependent async operations and make sure no rogue image is bound to the UI.
+위의 코드는 모든 기능을 포함하고 있는데다가 `imageSubscription`이 dispose되면 다른 모든 비동기 연산들이 한꺼번에 취소되기 때문에 이상한 이미지가 UI에 바운딩되는 경우도 없을 것입니다.
 
-### Aggregating network requests
+### 네트워크 리퀘스트 합치기
 
-What if you need to fire two requests and aggregate results when they have both finished?
+만약 여러분이 두 개의 리퀘스트를 발생했고 두 개가 모두 끝났을 때 결과를 합쳐서 받기를 원하면 어떻게 하시나요?
 
-Well, there is of course the `zip` operator
+Rx에는 `zip`이라는 연산자가 당연히 존재합니다.
 
 ```swift
 let userRequest: Observable<User> = API.getUser("me")
@@ -198,12 +198,12 @@ Observable.zip(userRequest, friendsRequest) { user, friends in
     return (user, friends)
 }
 .subscribe(onNext: { user, friends in
-    // bind them to the user interface
+    // UI에 바인딩합니다
 })
 .disposed(by: disposeBag)
 ```
 
-So what if those APIs return results on a background thread, and binding has to happen on the main UI thread? There is `observeOn`.
+API 결과는 백그라운드 쓰레드에서 받고 바인딩하는 것은 메인 UI 쓰레드에서 하려면 어떻게 해야 할까요? 그래서 `observeOn` 연산자가 존재합니다.
 
 ```swift
 let userRequest: Observable<User> = API.getUser("me")
@@ -214,12 +214,12 @@ Observable.zip(userRequest, friendsRequest) { user, friends in
 }
 .observeOn(MainScheduler.instance)
 .subscribe(onNext: { user, friends in
-    // bind them to the user interface
+    // UI에 바인딩 합니다
 })
 .disposed(by: disposeBag)
 ```
 
-There are many more practical use cases where Rx really shines.
+Rx에는 더 많은 빛나는 실전 예제들이 있습니다.
 
 ### State
 
