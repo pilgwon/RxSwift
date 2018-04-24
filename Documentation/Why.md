@@ -1,8 +1,8 @@
-## Why
+## 왜 Rx를 사용할까요?
 
-**Rx enables building apps in a declarative way.**
+**Rx는 앱을 선언형으로 개발할 수 있게 해줍니다.**
 
-### Bindings
+### 바인딩
 
 ```swift
 Observable.combineLatest(firstName.rx.text, lastName.rx.text) { $0 + " " + $1 }
@@ -10,7 +10,7 @@ Observable.combineLatest(firstName.rx.text, lastName.rx.text) { $0 + " " + $1 }
     .bind(to: greetingLabel.rx.text)
 ```
 
-This also works with `UITableView`s and `UICollectionView`s.
+Rx는 `UITableView`와 `UICollectionView`에서도 작동합니다.
 
 ```swift
 viewModel
@@ -22,40 +22,40 @@ viewModel
     .disposed(by: disposeBag)
 ```
 
-**Official suggestion is to always use `.disposed(by: disposeBag)` even though that's not necessary for simple bindings.**
+**dispose 메소드가 필요없는 아주 간단한 바인딩이라도 `.disposed(by: disposeBag)`를 항상 사용하는 것을 공식적으로는 추천하는 편입니다.**
 
-### Retries
+### 재시도
 
-It would be great if APIs wouldn't fail, but unfortunately they do. Let's say there is an API method:
+실패하지 않는 API가 있다면 매우 훌륭하겠지만, 불행하게도 그렇지 못하는 경우가 대부분입니다. 다음과 같은 API 메소드가 있다고 해봅시다:
 
 ```swift
 func doSomethingIncredible(forWho: String) throws -> IncredibleThing
 ```
 
-If you are using this function as it is, it's really hard to do retries in case it fails. Not to mention complexities modeling [exponential backoffs](https://en.wikipedia.org/wiki/Exponential_backoff). Sure it's possible, but the code would probably contain a lot of transient states that you really don't care about, and it wouldn't be reusable.
+만약 위의 메소드를 그대로 사용한다면 실패했을 경우에 다시 시도하는 작업이 매우 어려울 것입니다. [지수 백오프](https://en.wikipedia.org/wiki/Exponential_backoff) 모델링의 복잡성에 대해선 말하지 않아도 아실 것입니다. 물론 가능하지만, 그 코드는 여러분이 신경쓰지 않을 무수히 많은 일시적인 상태를 가질 것이고 다시 사용하지도 못 할 것입니다.
 
-Ideally, you would want to capture the essence of retrying, and to be able to apply it to any operation.
+이상적으로, 여러분은 재시도하고자 하는 그 부분만 골라서 재시도고, 어떤 연산자에도 적용할 수 있기를 원할 것입니다.
 
-This is how you can do simple retries with Rx
+다음은 Rx로 간단히 재시도하는 방법을 나타낸 코드입니다.
 
 ```swift
 doSomethingIncredible("me")
     .retry(3)
 ```
 
-You can also easily create custom retry operators.
+또한 여러분은 커스텀 재시도 연산자를 쉽게 만들 수 있습니다.
 
-### Delegates
+### 델리게이트
 
-Instead of doing the tedious and non-expressive:
+다음과 같은 지루하고 표현적이지 않은 코드 대신에...
 
 ```swift
-public func scrollViewDidScroll(scrollView: UIScrollView) { [weak self] // what scroll view is this bound to?
+public func scrollViewDidScroll(scrollView: UIScrollView) { [weak self] // 지금 스크롤되고 있는 스크롤 뷰는 어떤 것인지 알 수 있나요?
     self?.leftPositionConstraint.constant = scrollView.contentOffset.x
 }
 ```
 
-... write
+이렇게 작성해보세요
 
 ```swift
 self.resultsTableView
@@ -66,24 +66,22 @@ self.resultsTableView
 
 ### KVO
 
-Instead of:
-
 ```
-`TickTock` was deallocated while key value observers were still registered with it. Observation info was leaked, and may even become mistakenly attached to some other object.
+`TickTock`은 KVO가 등록되어 있는 동안 계속 할당되어 있습니다. 관찰에서 누수가 일어났을 때, 그때는 다른 객체로 옮겨질수도 있습니다.
 ```
-
-and
 
 ```objc
--(void)observeValueForKeyPath:(NSString *)keyPath
+-(void)observeValueForKeyPath:(NSString * )keyPath
                      ofObject:(id)object
-                       change:(NSDictionary *)change
-                      context:(void *)context
+                       change:(NSDictionary * )change
+                      context:(void * )context
 ```
 
-Use [`rx.observe` and `rx.observeWeakly`](GettingStarted.md#kvo)
+위의 두 내용 대신에,
 
-This is how they can be used:
+[`rx.observe` 와 `rx.observeWeakly`](GettingStarted.md#kvo)를 사용해보세요.
+
+다음과 같이 사용하시면 됩니다.
 
 ```swift
 view.rx.observe(CGRect.self, "frame")
@@ -93,7 +91,7 @@ view.rx.observe(CGRect.self, "frame")
     .disposed(by: disposeBag)
 ```
 
-or
+또는 이렇게 사용하시면 됩니다.
 
 ```swift
 someSuspiciousViewController
@@ -104,37 +102,37 @@ someSuspiciousViewController
     .disposed(by: disposeBag)
 ```
 
-### Notifications
+### 노티피케이션
 
-Instead of using:
+다음과 같이 작성하는 것 대신에...
 
 ```swift
 @available(iOS 4.0, *)
 public func addObserverForName(name: String?, object obj: AnyObject?, queue: NSOperationQueue?, usingBlock block: (NSNotification) -> Void) -> NSObjectProtocol
 ```
 
-... just write
+이렇게 사용해 보세요.
 
 ```swift
 NotificationCenter.default
     .rx.notification(NSNotification.Name.UITextViewTextDidBeginEditing, object: myTextView)
-    .map {  /*do something with data*/ }
+    .map {  /*데이터로 작업하는 공간*/ }
     ....
 ```
 
-### Transient state
+### 임시 상태
 
-There are also a lot of problems with transient state when writing async programs. A typical example is an autocomplete search box.
+비동기 프로그램을 작성할 떄 임시 상태를 사용하는 것엔 문제가 많습니다. 가장 많이 사용되는 예제로는 검색창의 자동완성이 있습니다.
 
-If you were to write the autocomplete code without Rx, the first problem that probably needs to be solved is when `c` in `abc` is typed, and there is a pending request for `ab`, the pending request gets canceled. OK, that shouldn't be too hard to solve, you just create an additional variable to hold reference to the pending request.
+만약 여러분이 Rx없이 자동 완성 기능을 추가하려면, 가장 첫번째로 마주치는 문제는 `abc`의 `c`가 언제 입력됐는지 알아내는 것입니다. 그리고 기존에 `ab`에 대한 리퀘스트가 대기상태로 있을 것이고, 그 대기상태의 리퀘스트는 취소될 것입니다. 이러한 문제는 해결하기 아주 어려운 문제이고, 대기상태에 있는 리퀘스트를 잡아두기 위해 추가적인 변수를 만들어야 할 것입니다.
 
-The next problem is if the request fails, you need to do that messy retry logic. But OK, a couple more fields that capture the number of retries that need to be cleaned up.
+다음 문제는 리퀘스트가 실패했을 때, 여러분은 아주 지저분한 재시도 로직을 작성해야 한다는 것입니다. 하지만 괜찮습니다. 몇 개의 필드만 더 추가하면 재시도를 몇 번이나 했는지에 대해서도 잘 알게 될테니까요.
 
-It would be great if the program would wait for some time before firing a request to the server. After all, we don't want to spam our servers in case somebody is in the process of typing something very long. An additional timer field maybe?
+프로그램이 리퀘스트를 서버로 보내기전에 아주 잠시만 기다려준다면 정말 좋을 것 같지 않나요? 게다가 누군가가 아주아주 긴 무언가를 입력하는 과정이 아니라면 서버를 괴롭히고 싶지도 않습니다. 그러면 추가적인 타이머가 필요하겠네요?
 
-There is also a question of what needs to be shown on screen while that search is executing, and also what needs to be shown in case we fail even with all of the retries.
+또한 그 검색 결과를 화면에 보여줄지 말지 결정해야 하고, 실패해서 재시도 할 때는 어떤 것을 보여줄지도 정해야 합니다.
 
-Writing all of this and properly testing it would be tedious. This is that same logic written with Rx.
+앞서나온 모든 기능을 추가하고 알맞게 테스트 하는 것은 매우 지루할 것입니다. 아래는 그 모든 로직을 Rx로 작성한 코드입니다.
 
 ```swift
 searchTextField.rx.text
@@ -152,7 +150,7 @@ searchTextField.rx.text
     .disposed(by: disposeBag)
 ```
 
-There are no additional flags or fields required. Rx takes care of all that transient mess.
+추가적인 플래그나 필드는 더 이상 필요없습니다. Rx는 임시적이고 지저분한 모든 것을 관리해줍니다.
 
 ### Compositional disposal
 
