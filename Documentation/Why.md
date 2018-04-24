@@ -221,23 +221,23 @@ Observable.zip(userRequest, friendsRequest) { user, friends in
 
 Rx에는 더 많은 빛나는 실전 예제들이 있습니다.
 
-### State
+### 상태
 
-Languages that allow mutation make it easy to access global state and mutate it. Uncontrolled mutations of shared global state can easily cause [combinatorial explosion](https://en.wikipedia.org/wiki/Combinatorial_explosion#Computing).
+변화(mutation)를 허락하는 언어는 전역 상태에 접근하기 쉽고 변경할 수 있게 해줍니다. 공유된 전역 상태의 컨트롤되지 않는 변화는 쉽게 [combinatorial explosion](https://en.wikipedia.org/wiki/Combinatorial_explosion#Computing)을 일으킬 수 있습니다.
 
-But on the other hand, when used in a smart way, imperative languages can enable writing more efficient code closer to hardware.
+하지만 그 반대로, 똑똑하게 사용한다면 언어로 더욱 효율적인 코드를 작성할 수 있고 하드웨어에 더 가까이 다가갈 수 있습니다.
 
-The usual way to battle combinatorial explosion is to keep state as simple as possible, and use [unidirectional data flows](https://developer.apple.com/videos/play/wwdc2014-229) to model derived data.
+combinatorial explosion에 대항하는 보통의 방법은 상태를 최대한 간단하게 유지하고, [단방향 데이터 흐름](https://developer.apple.com/videos/play/wwdc2014-229)을 사용해서 모델에서 유래된 데이터를 다루는 것입니다.
 
-This is where Rx really shines.
+여기가 바로 Rx가 정말로 빛이 나는 부분입니다.
 
-Rx is that sweet spot between functional and imperative worlds. It enables you to use immutable definitions and pure functions to process snapshots of mutable state in a reliable composable way.
+Rx는 함수형과 명령형 세계 사이의 그 달콤한 부분 어딘가일 것입니다. Rx는 여러분이 변하지 않는 정의를 사용하고 변화하는 상태의 스냅샷을 처리할 수 있도록 해줍니다.
 
-So what are some practical examples?
+실제 예제는 어떤것이 있을까요?
 
-### Easy integration
+### 쉬운 통합
 
-What if you need to create your own observable? It's pretty easy. This code is taken from RxCocoa and that's all you need to wrap HTTP requests with `URLSession`
+만약 여러분만의 옵저버블을 만들어야하면 어떨까요? 꽤나 쉽습니다. 다음 코드는 RxCocoa에서 가져왔고 여러분이 해야하는 일은 그저 `URLSession`으로 HTTP 리퀘스트를 감싸는 일입니다.
 
 ```swift
 extension Reactive where Base: URLSession {
@@ -267,32 +267,32 @@ extension Reactive where Base: URLSession {
 }
 ```
 
-### Benefits
+### 이득
 
-In short, using Rx will make your code:
+짧게 말하면, Rx를 쓰는 것은 여러분의 코드를,
 
-* Composable <- Because Rx is composition's nickname
-* Reusable <- Because it's composable
-* Declarative <- Because definitions are immutable and only data changes
-* Understandable and concise <- Raising the level of abstraction and removing transient states
-* Stable <- Because Rx code is thoroughly unit tested
-* Less stateful <- Because you are modeling applications as unidirectional data flows
-* Without leaks <- Because resource management is easy
+* 쉽게 구성할 수 있습니다. Rx는 구성(composition)의 별명이기 때문입니다.
+* 재사용이 가능합니다. 쉽게 구성할 수 있기 때문입니다.
+* 선언형입니다. 정의 자체는 바꿀 수 없고 데이터만 바뀌기 때문입니다.
+* 이해가 쉽고 간결합니다. 추상화의 단계를 올리고 임시적인 상태를 없애줍니다.
+* 안정적입니다. Rx의 코드는 완전히 유닛 테스트되었기 때문입니다.
+* 상태에 적게 영향을 받습니다. 어플리케이션은 단방향 데이터 흐름으로 모델링되기 때문입니다.
+* 누수가 일어나지 않습니다. 자원 관리가 매우 쉽기 때문입니다.
 
-### It's not all or nothing
+### 모두 알지 않는다면 아무것도 아닙니다
 
-It is usually a good idea to model as much of your application as possible using Rx.
+여러분의 어플리케이션의 모델을 Rx를 사용할 수 있게 만드는 것은 보통 좋은 아이디어입니다.
 
-But what if you don't know all of the operators and whether or not there even exists some operator that models your particular case?
+하지만 여러분이 모든 연산자에 대해 모르고 특별한 경우에 써야하는 연산자가 있다는 것을 모른다면 어떨까요?
 
-Well, all of the Rx operators are based on math and should be intuitive.
+모든 Rx 연산자는 수학에 기반해 있어서 직관적입니다.
 
-The good news is that about 10-15 operators cover most typical use cases. And that list already includes some of the familiar ones like `map`, `filter`, `zip`, `observeOn`, ...
+좋은 소식은 10 ~ 15개의 연산자가 대부분의 경우를 커버한다는 것입니다. 그리고 그 목록은 우리에게 친근한 `map`, `filter`, `zip`, `observeOn`을 포함하고 있습니다.
 
-There is a huge list of [all Rx operators](http://reactivex.io/documentation/operators.html).
+여기 [모든 Rx 연산자](http://reactivex.io/documentation/operators.html)에 대한 목록이 있습니다.
 
-For each operator, there is a [marble diagram](http://reactivex.io/documentation/operators/retry.html) that helps to explain how it works.
+각각의 연산자는 그것만의 [마블 다이어그램](http://reactivex.io/documentation/operators/retry.html)이 있으며, 그 다이어그램은 연산자가 어떻게 작동하는지 이해하기 쉽게 만들어줍니다.
 
-But what if you need some operator that isn't on that list? Well, you can make your own operator.
+하지만 만약 이 목록에 없는 연산자가 필요하면 어떻게 할까요? 그러면 여러분만의 연산자를 만드시면 됩니다.
 
-What if creating that kind of operator is really hard for some reason, or you have some legacy stateful piece of code that you need to work with? Well, you've got yourself in a mess, but you can [jump out of Rx monads](GettingStarted.md#life-happens) easily, process the data, and return back into it.
+아니면 몇 가지 이유로 그러한 커스텀 연산자를 만들기 어려운 경우거나, 상태를 건드리는 레거시 코드 조각들이 여전히 많이 남아 있는 경우신가요? 그런 경우라면 복잡하다고 생각하실수도 있겠지만, 쉽게 [Rx 모나드를 잠시 나갔다가](GettingStarted.md#엄청난-변화), 데이터를 처리하고, 그리고 돌아오면 됩니다.
