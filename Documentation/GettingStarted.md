@@ -1082,53 +1082,52 @@ let searchResults = searchText
 
 보통 여러분이 원하는 것은 계산된 검색 결과를 공유하는 것일겁니다. 이게 바로 `shareReplay` 의 의미입니다.
 
-**It is usually a good rule of thumb in the UI layer to add `shareReplay` at the end of transformation chain because you really want to share calculated results. You don't want to fire separate HTTP connections when binding `searchResults` to multiple UI elements.**
+**UI 레이어에 `shareReplay` 를 추가하는 좋은 방법은 transformation 체인 끝에 추가하는 것입니다. 그렇게 해야 결과를 공유받을 수 있으니까요! 여러 UI 요소에 `searchResults` 를 바인딩할 때 각각 독립된 HTTP 커넥션을 발생시키고 싶지는 않으실 것입니다.**
 
-**Also take a look at `Driver` unit. It is designed to transparently wrap those `shareReply` calls, make sure elements are observed on main UI thread and that no error can be bound to UI.**
+**그리고 `Driver` 유닛을 살펴보세요. Driver 유닛은 `shareReplay` 호출을 투명하게 감싸서 요소가 메인 UI 쓰레드에서 관찰되고 있고 UI에 에러가 일어나지 않도록 보증해주기 위해 디자인되었습니다.**
 
-## Making HTTP requests
+## HTTP 리퀘스트 만들기
 
-Making http requests is one of the first things people try.
+HTTP 리퀘스트를 만드는 것은 사람들이 가장 먼저 하는 일 중 하나입니다.
 
-You first need to build `URLRequest` object that represents the work that needs to be done.
+먼저, 무엇을 해야하는지 표시하기 위해서 `URLRequest` 객체를 만들어야 합니다.
 
-Request determines is it a GET request, or a POST request, what is the request body, query parameters ...
+리퀘스트는 이 리퀘스트가 GET인지, POST인지부터 리퀘스트 바디는 어떤건지, 쿼리 파라미터는 어떤건지 등에 대해 알려줍니다.
 
-This is how you can create a simple GET request
+아래는 간단한 GET 리퀘스트를 만드는 방법입니다.
 
 ```swift
 let req = URLRequest(url: URL(string: "http://en.wikipedia.org/w/api.php?action=parse&page=Pizza&format=json"))
 ```
 
-If you want to just execute that request outside of composition with other observables, this is what needs to be done.
+만약 다른 옵저버블들로 만들어진 리퀘스트를 그저 바깥에 보내기만 하는거라면 다음과 같은 코드가 필요할 것입니다.
 
 ```swift
 let responseJSON = URLSession.shared.rx.json(request: req)
 
-// no requests will be performed up to this point
-// `responseJSON` is just a description how to fetch the response
+// 이 포인트에서는 어떤 리퀘스트도 발생하지 않습니다
+// `responseJSON` 은 리스폰스를 어떻게 패치할지에 대한 설명이라고 생각하시면 됩니다
 
 
 let cancelRequest = responseJSON
-    // this will fire the request
+    // 여기서 리퀘스트가 발생할 것입니다
     .subscribe(onNext: { json in
         print(json)
     })
 
 Thread.sleep(forTimeInterval: 3.0)
 
-// if you want to cancel request after 3 seconds have passed just call
-cancelRequest.dispose()
+// 3초 후에 리퀘스트를 취소하고 싶으시면 여기서 cancelRequest.dispose() 를 호출하시면 됩니다
 
 ```
 
-**URLSession extensions don't return result on `MainScheduler` by default.**
+**URLSession 익스텐션은 기본적으로 `MainScheduler`에 결과를 출력하진 않습니다.**
 
-In case you want a more low level access to response, you can use:
+더 깊은 레벨의 리스폰스를 원하신다면 다음과 같이 사용하실 수 있습니다:
 
 ```swift
 URLSession.shared.rx.response(myURLRequest)
-    .debug("my request") // this will print out information to console
+    .debug("my request") // 정보를 콘솔에 출력합니다
     .flatMap { (data: NSData, response: URLResponse) -> Observable<String> in
         if let response = response as? HTTPURLResponse {
             if 200 ..< 300 ~= response.statusCode {
@@ -1144,15 +1143,16 @@ URLSession.shared.rx.response(myURLRequest)
         }
     }
     .subscribe { event in
-        print(event) // if error happened, this will also print out error to console
+        print(event) // 에러가 발생하면, 콘솔에 에러도 출력될 것입니다
     }
 ```
-### Logging HTTP traffic
 
-In debug mode RxCocoa will log all HTTP request to console by default. In case you want to change that behavior, please set `Logging.URLRequests` filter.
+### HTTP 트래픽 로깅하긱
+
+RxCocoa의 디버그 모드는 모든 HTTP 리퀘스트를 콘솔에 기본적으로 출력합니다. 이러한 행동을 하지 않도록 하려면, `Logging.URLRequest` 필터를 설정하면 됩니다.
 
 ```swift
-// read your own configuration
+// 여러분이 설정한 값을 불러옵니다
 public struct Logging {
     public typealias LogURLRequest = (URLRequest) -> Bool
 
@@ -1168,8 +1168,8 @@ public struct Logging {
 
 ## RxDataSources
 
-... is a set of classes that implement fully functional reactive data sources for `UITableView`s and `UICollectionView`s.
+`RxDataSources` 는 `UITableView`와 `UICollectionView`를 위한 함수형 리액티브 데이터 소스를 완벽히 구현한 클래스들의 모음입니다.
 
-RxDataSources are bundled [here](https://github.com/RxSwiftCommunity/RxDataSources).
+RxDataSources는 [여기서](https://github.com/RxSwiftCommunity/RxDataSources) 보실 수 있습니다.
 
-Fully functional demonstration how to use them is included in the [RxExample](../RxExample) project.
+어떻게 사용하는지에 대해 궁금하시다면 [RxExample](../RxExample) 프로젝트에 포함돼 있으니 여기서 확인하시면 됩니다.
