@@ -72,29 +72,28 @@ b.value = -8                                 // 아무것도 출력하지 않습
 
 ## 간단한 UI 바인딩
 
-* Instead of binding to variables, let's bind to `UITextField` values using the `rx.text` property
-* Next, `map` the `String` into an `Int` and determine if the number is prime using an async API
-* If the text is changed before the async call completes, a new async call will replace it via `concat`
-* Bind the results to a `UILabel`
+* 변수에 바인딩하는 것 대신에, `rx.text`를 사용해서 `UITextField`에 값을 바인딩합니다.
+* 다음으로, `String`을 `Int`에 `map`을 사용해서 매핑하고 비동기 API를 사용해서 그 숫자가 소수인지 확인합니다.
+* 비동기 호출이 완료되기 전에 텍스트가 바뀌면, 기존의 비동기 호출을 새로운 비동기 호출로 `concat`을 사용해서 바꿔치기 합니다.
+* 결과를 `UILabel`에 바인딩합니다.
 
 ```swift
-let subscription/*: Disposable */ = primeTextField.rx.text      // type is Observable<String>
-            .map { WolframAlphaIsPrime(Int($0) ?? 0) }          // type is Observable<Observable<Prime>>
-            .concat()                                           // type is Observable<Prime>
-            .map { "number \($0.n) is prime? \($0.isPrime)" }   // type is Observable<String>
-            .bind(to: resultLabel.rx.text)                        // return Disposable that can be used to unbind everything
+let subscription/*: Disposable */ = primeTextField.rx.text      // 타입은 Observable<String> 입니다
+            .map { WolframAlphaIsPrime(Int($0) ?? 0) }          // 타입은 Observable<Observable<Prime>> 입니다
+            .concat()                                           // 타입은 Observable<Prime> 입니다
+            .map { "number \($0.n) is prime? \($0.isPrime)" }   // 타입은 Observable<String> 입니다
+            .bind(to: resultLabel.rx.text)                      // 모두 해제하고 싶을 때 사용할 Disposable을 반환합니다
 
-// This will set `resultLabel.text` to "number 43 is prime? true" after
-// server call completes.
+// 서버 호출 완료 후에 `resultLabel.text`에는 "number 43 is prime? true"가 입력됩니다.
 primeTextField.text = "43"
 
 // ...
 
-// to unbind everything, just call
+// 모두 해제하려면 아래의 코드를 입력하면 됩니다.
 subscription.dispose()
 ```
 
-All of the operators used in this example are the same operators used in the first example with variables. There's nothing special about it.
+위 예제에서 쓰이는 모든 연산자는 첫 번째 예제에서 변수와 같이 쓰인 연산자가 동일합니다. 특별한 점이 없다는 뜻입니다.
 
 ## 자동 입력 유효성 확인
 
