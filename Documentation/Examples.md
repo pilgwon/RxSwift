@@ -97,12 +97,12 @@ subscription.dispose()
 
 ## 자동 입력 유효성 확인
 
-If you are new to Rx, the next example will probably be a little overwhelming at first. However, it's here to demonstrate how RxSwift code looks in the real-world.
+만약 여러분이 Rx에 처음이라면, 다음 예제는 처음 봤을 때 약간 이해가 안 될 수도 있습니다. 하지만, 이 부분이 RxSwift 코드가 실제 세계에서 어떻게 쓰이는지에 대해 제일 잘 보여줄 것입니다.
 
-This example contains complex async UI validation logic with progress notifications.
-All operations are canceled the moment `disposeBag` is deallocated.
+이 예제는 복잡한 비동기 UI 유효성 체크 로직을 프로그래스 노티피케이션과 함께 포함하고 있습니다.
+모든 연산은 `disposeBag`이 해제되는 순간 취소됩니다.
 
-Let's give it a shot.
+살펴봅시다.
 
 ```swift
 enum Availability {
@@ -123,27 +123,26 @@ enum Availability {
     }
 }
 
-// bind UI control values directly
-// use username from `usernameOutlet` as username values source
+// UI 컨트롤 값을 직접적으로 바인딩합니다
+// `usernameOutlet`을 통해 username을 사용합니다
 self.usernameOutlet.rx.text
     .map { username in
 
-        // synchronous validation, nothing special here
+        // 동기 유효성 체크하는 부분입니다. 여긴 특별할 것이 없습니다.
         if username.isEmpty {
-            // Convenience for constructing synchronous result.
-            // In case there is mixed synchronous and asynchronous code inside the same
-            // method, this will construct an async result that is resolved immediately.
+            // 동기 결과를 만들어낼 때 좀 더 간편하기 위해.
+            // 동기 코드와 비동기 코드가 한 메소드에 섞여 있을 경우에,
+            // 다음과 같은 코드는 즉시 해결되도록 비동기 결과를 만들어냅니다.
             return Observable.just(Availability.invalid(message: "Username can't be empty."))
         }
 
         // ...
 
-        // User interfaces should probably show some state while async operations
-        // are executing.
+        // UI는 비동기 작업이 돌아가는 동안에도 무언가를 보여주어야 할 것입니다.
         let loadingValue = Availability.pending(message: "Checking availability ...")
 
-        // This will fire a server call to check if the username already exists.
-        // Its type is `Observable<ValidationResult>`
+        // 이 코드는 username이 사용할 수 있는 지 서버 호출을 하는 역할을 합니다.
+        // 타입은 `Observable<ValidationResult>` 입니다.
         return API.usernameAvailable(username)
           .map { available in
               if available {
@@ -153,29 +152,30 @@ self.usernameOutlet.rx.text
                   return Availability.unavailable(message: "Username already taken")
               }
           }
-          // use `loadingValue` until server responds
+          // `loadingValue` 를 사용해서 서버가 리스폰스를 보내줄 때까지 기다립니다
           .startWith(loadingValue)
     }
-// Since we now have `Observable<Observable<ValidationResult>>`
-// we need to somehow return to a simple `Observable<ValidationResult>`.
-// We could use the `concat` operator from the second example, but we really
-// want to cancel pending asynchronous operations if a new username is provided.
-// That's what `switchLatest` does.
+
+// 이제 `Observable<Observable<ValidationResult>>`를 가지고 있기 때문에
+// 간단한 `Observable<ValidationResult>` 를 반환하도록 만들어야 합니다.
+// 두번째 예제의 `concat` 연산자를 사용할 수 있지만, 우리가 정말로 원하는 것은
+// 새로운 username이 주어졌다면 대기 상태의 비동기 작업을 취소하는 것입니다.
+// 이게 `switchLatest`가 하는 일입니다.
     .switchLatest()
-// Now we need to bind that to the user interface somehow.
-// Good old `subscribe(onNext:)` can do that.
-// That's the end of `Observable` chain.
+// 이제 그 결과를 UI에 바인딩해야 합니다.
+// 오랜 좋은 친구인 `subscribe(onNext:)`가 해줄 것입니다.
+// 여기가 `옵저버블` 체인의 끝입니다.
     .subscribe(onNext: { validity in
         errorLabel.textColor = validationColor(validity)
         errorLabel.text = validity.message
     })
-// This will produce a `Disposable` object that can unbind everything and cancel
-// pending async operations.
-// Instead of doing it manually, which is tedious,
-// let's dispose everything automagically upon view controller dealloc.
+// 여기선 `Disposable` 객체를 만들어낼 것이고
+// 이 객체는 모두를 해제하고 대기상태의 비동기 작업들을 취소할 수 있습니다.
+// 해제를 수동으로 하는 것은 너무 지겨우니,
+// 뷰 컨트롤러가 dealloc될 때 모두를 dispose 시킵시다.
     .disposed(by: disposeBag)
 ```
 
-It doesn't get any simpler than that. There are [more examples](../RxExample) in the repository, so feel free to check them out.
+이보다 더 간단해질 순 없습니다. 레포지토리에는 [더 많은 예제](../RxExample)들이 준비되어 있으니 마음 편하게 보세요.
 
-They include examples on how to use Rx in the context of MVVM pattern or without it.
+예제 중에는 MVVM 패턴에서 Rx를 어떻게 사용해야 하는지에 대해서 보여주는 예제도 포함하고 있으니 관심있으시면 [여기서](../RxExample) 확인가능합니다.
