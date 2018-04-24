@@ -9,65 +9,65 @@ Examples
 
 ## 계산된 변수
 
-First, let's start with some imperative code.
-The purpose of this example is to bind the identifier `c` to a value calculated from `a` and `b` if some condition is satisfied.
+먼저, 몇가지 명령형 코드를 봅시다.
+이 예제의 목적은 `a` 와 `b` 사이에서 나온 계산된 값이 조건을 만족하면 `c` 식별자에 바인딩하는 것입니다.
 
-Here is the imperative code that calculates the value of `c`:
+여기 `c`에게 값을 계산해주는 명령형 코드가 있습니다.
 
 ```swift
-// this is standard imperative code
+// 이것은 기본적인 명령형 코드입니다
 var c: String
-var a = 1       // this will only assign the value `1` to `a` once
-var b = 2       // this will only assign the value `2` to `b` once
+var a = 1       // 여기서는 `1`이라는 값을 `a`에 한 번 할당할 것입니다
+var b = 2       // 여기서는 `2`라는 값을 `b`에 한 번 할당할 것입니다
 
 if a + b >= 0 {
-    c = "\(a + b) is positive" // this will only assign the value to `c` once
+    c = "\(a + b) is positive" // 여기서는 `c`에 결과값을 한 번 할당할 것입니다
 }
 ```
 
-The value of `c` is now `3 is positive`. However, if we change the value of `a` to `4`, `c` will still contain the old value.
+이제 `c`의 값은 `3 is positive`일 것입니다. 하지만 우리가 `a`의 값ㅇ르 `4`로 바꿔도, `c`의 값은 여전히 예전의 값일 것입니다.
 
 ```swift
-a = 4           // `c` will still be equal to "3 is positive" which is not good
-                // we want `c` to be equal to "6 is positive" since 4 + 2 = 6
+a = 4   // `c`는 여전히 제대로 된 게 아닌 "3 is positive"라는 값을 가지고 있을 것입니다
+        // 4 + 2 = 6이기 때문에, `c`가 "6 is positive"라는 값을 가지기를 원합니다
 ```
 
-This is not the desired behavior.
+이것은 원했던 결과가 아닙니다.
 
-This is the improved logic using RxSwift:
+다음은 RxSwift를 통해 더 발전된 로직입니다.
 
 ```swift
 let a /*: Observable<Int>*/ = Variable(1)   // a = 1
 let b /*: Observable<Int>*/ = Variable(2)   // b = 2
 
-// combines latest values of variables `a` and `b` using `+`
+// `+`를 사용해서 변수 `a`와 `b`의 최근 값을 조합합니다
 let c = Observable.combineLatest(a.asObservable(), b.asObservable()) { $0 + $1 }
-	.filter { $0 >= 0 }               // if `a + b >= 0` is true, `a + b` is passed to the map operator
-	.map { "\($0) is positive" }      // maps `a + b` to "\(a + b) is positive"
+	.filter { $0 >= 0 }               // `a + b >= 0`가 참이면, `a + b`가 map 연산자로 넘어갑니다
+	.map { "\($0) is positive" }      // `a + b`를 매핑해서 "\(a + b) is positive"로 만듭니다
 
-// Since the initial values are a = 1 and b = 2
-// 1 + 2 = 3 which is >= 0, so `c` is initially equal to "3 is positive"
+// 초기값은 a = 1, b = 2 이었고
+// 1 + 2 = 3 은 0보다 큽니다. 그래서 `c`의 초기값은 "3 is positive"가 됩니다.
 
-// To pull values out of the Rx `Observable` `c`, subscribe to values from `c`.
-// `subscribe(onNext:)` means subscribe to the next (fresh) values of `c`.
-// That also includes the initial value "3 is positive".
-c.subscribe(onNext: { print($0) })          // prints: "3 is positive"
+// Rx `옵저버블`인 `c`의 값을 가져오려면, `c`의 값을 구독해야 합니다.
+// `subscribe(onNext:)`는 `c`의 다음 (신선한)값에 대해서 구독한다는 것을 의미합니다.
+// 그것은 초기값인 "3 is positive"도 포함한다는 의미입니다.
+c.subscribe(onNext: { print($0) })          // "3 is positive"를 출력합니다
 
-// Now, let's increase the value of `a`
-a.value = 4                                   // prints: 6 is positive
-// The sum of the latest values, `4` and `2`, is now `6`.
-// Since this is `>= 0`, the `map` operator produces "6 is positive"
-// and that result is "assigned" to `c`.
-// Since the value of `c` changed, `{ print($0) }` will get called,
-// and "6 is positive" will be printed.
+// 이제 `a`의 값을 증가시켜 보겠습니다
+a.value = 4                                   // "6 is positive"를 출력합니다
+// 최근 값인 `4`와 `2`의 합은 `6`이 됩니다.
+// 이 값은 `>= 0` 조건을 만족하고, `map` 연산자는 "6 is positive"를 생산합니다.
+// 그리고 그 결과는 `c`에 "할당"됩니다.
+// `c`의 값이 바뀌었기 때문에, `{ print($0) }` 이 호출됩니다.
+// 그리고 "6 is positive"가 출력됩니다.
 
-// Now, let's change the value of `b`
-b.value = -8                                 // doesn't print anything
-// The sum of the latest values, `4 + (-8)`, is `-4`.
-// Since this is not `>= 0`, `map` doesn't get executed.
-// This means that `c` still contains "6 is positive"
-// Since `c` hasn't been updated, a new "next" value hasn't been produced,
-// and `{ print($0) }` won't be called.
+// 이제 `b`의 값을 바꿔보겠습니다
+b.value = -8                                 // 아무것도 출력하지 않습니다
+// 최근 값들을 합해보면 `4 + (-8)`의 결과는 `-4`입니다.
+// 이 값은 `>= 0`의 조건을 만족하지 않으므로, `map` 연산자는 실행되지 않습니다.
+// 이것은 `c`가 여전히 "6 is positive" 라는 값을 가지고 있을 것을 의미합니다.
+// `c`가 업데이트되지 않았기 떄문에, 새로운 "다음" 값은 생성되지 않습니다.
+// 그리고 `{ print($0) }` 도 호출되지 않습니다.
 ```
 
 ## 간단한 UI 바인딩
