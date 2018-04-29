@@ -1,19 +1,18 @@
-## Comparison with ReactiveCocoa
+## RxSwift와 다른 라이브러리 비교
 
-RxSwift is somewhat similar to ReactiveCocoa since ReactiveCocoa borrows a large number of concepts from Rx.
+RxSwift는 ReactiveCocoa가 Rx의 수많은 컨셉을 빌렸기 때문에 ReactiveCocoa와 매우 비슷합니다.
 
-One of the main goals of this project was to create a significantly simpler interface that is more aligned with other Rx implementations, offers a richer concurrency model, offers more optimization opportunities and is more aligned with built-in Swift error handling mechanisms.
+이 프로젝트의 주요 목표 중 하나는 의미있을 정도로 간단한 인터페이스를 만드는 것입니다. 이 인터페이스는 다른 Rx 구현방식과 잘 정렬돼 있고, 더 풍부한 컨커런시 모델을 제공하며, 더 많이 최적화된 기회를 제공하고 내장 스위프트 에러 핸들링 메커니즘과 잘 어우러져야 합니다.
 
-We've also decided to only rely on the Swift/llvm compiler and not introduce any external dependencies.
+또한 오로지 스위프트 / llvm 컴파일러에만 의존하고 외부의 다른 것들에겐 의존하지 않기로 정했습니다.
 
-Probably the main difference between these projects is in their approach in building abstractions.
+아마도 이러한 프로젝트들과의 주요 차이점은 추상화를 만드는 것에 접근하는 방식일 것입니다.
 
-The main goal of RxSwift project is to provide environment agnostic compositional computation glue abstracted in the form of observable sequences.
-We then aim to improve the experience of using RxSwift on specific platforms. To do this, RxCocoa uses generic computations to build more practical abstractions and wrap Foundation/Cocoa/UKit frameworks. That means that other libraries give context and semantics to the generic computation engine RxSwift provides such as `Driver`, `ControlProperty`, `ControlEvent`s and more.
+RxSwift 프로젝트의 주요 목표는 환경에 상관없이 옵저버블 시퀀스의 형태로 추상화된 접착제를 제공하는 것입니다. 그 이후에는 특정 플랫폼에서 RxSwift를 사용할 때의 경험을 향상시키려고 합니다. 그러기 위해선, RxCocoa가 많은 실용적인 추상화를 만들기 위해서 제네릭 계산을 사용하고 Foundation, Cocoa, UIKit을 감싸야 합니다. 즉 다른 라이브러리들은 제네릭 계산 엔진인 RxSwift이 제공하는 `Driver`, `ControlProperty`, `ControlEvent`등과 같은 컨텍스트와 의미를 부여합니다.
 
-One of the benefits to representing all of these abstractions as a single concept - ​_observable sequences_​ - is that all computation abstractions built on top of them are also composable in the same fundamental way. They all follow the same contract and implement the same interface.
- It is also easy to create flexible subscription (resource) sharing strategies or use one of the built-in ones: `share`, `shareReplay`, `publish`, `multicast`, `shareReplayLatestWhileConnected`...
+이 모든 추상화를 사용하는 이유는 한 가지 컨셉으로 설명할 수 있습니다. _옵저버블 시퀀스_​는 모든 계산 추상화가 또한 같은 근본적인 방법으로 구성 가능합니다. 모든 것들이 같은 약속을 따르고 같은 인터페이스를 구현합니다.
+그리고 또한 유연한 구독(자원) 공유 전략을 만들거나 `share`, `shareReplay`, `publish`, `multicast`, `shareReplayLatestWhileConnected`등과 같은 내장된 연산자를 사용할 수 있습니다.
 
-This library also offers a fine-tunable concurrency model. If concurrent schedulers are used, observable sequence operators will preserve sequence properties. The same observable sequence operators will also know how to detect and optimally use known serial schedulers. ReactiveCocoa has a more limited concurrency model and only allows serial schedulers.
+이 라이브러리는 잘 튜닝된 컨커런시 모델을 제공합니다. 만약 컨커런트 스케쥴러가 사용중이면, 옵저버블 시퀀스 연산자는 시퀀스 속성을 유지할 것입니다. 또한 동일한 옵저버블 시퀀스 연산자는 알려진 시리얼 스케쥴러를 감지하고 최적으로 사용하는 법을 알고 있습니다. ReactiveCocoa는 더 많은 제한된 컨커런시 모델을 가지고 있고 시리얼 스케쥴러만을 허용합니다.
 
-Multithreaded programming is really hard and detecting non trivial loops is even harder. That's why all operators are built in a fault tolerant way. Even if element generation occurs during element processing (recursion), operators will try to handle that situation and prevent deadlocks. This means that in the worst possible case programming error will cause stack overflow, but users won't have to manually kill the app, and you will get a crash report in error reporting systems so you can find and fix the problem.
+멀티쓰레드 프로그래밍은 매우 어렵고 치명적인 부분을 찾는 것은 더욱 더 어렵습니다. 그것이 모든 연산자가 실패를 허용하는 방식으로 만들어진 이유입니다. 심지어 작업 중에 요소가 만들어지면(재귀), 연산자는 그 상황을 조정하려고 하고 데드락을 방지합니다. 그 말인 즉슨, 프로그래밍 에러 중 가장 최악의 경우는 스택 오버플로우를 발생하는 것인데, 이 경우에도 사용자는 수동으로 앱을 죽이지 않아도 되며 여러분은 크래시 리포트를 받아서 문제를 찾고 수정할 수 있습니다.
