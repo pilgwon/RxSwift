@@ -19,7 +19,7 @@
 1. [디버그 모드 켜기 (Enabling Debug Mode)](#디버그-모드-켜기)
 1. [KVO](#kvo)
 1. [UI 레이어 팁 (UI layer tips)](#UI-레이어-팁)
-1. [HTTP 리퀘스트 만들기 (Making HTTP requests)](#HTTP-리퀘스트-만들기)
+1. [HTTP 리퀘스트 만들기 (Making HTTP requests)](#http-리퀘스트-만들기)
 1. [RxDataSources](#rxdatasources)
 1. [Driver](Traits.md#driver)
 1. [Traits: Driver, Single, Maybe, Completable](Traits.md)
