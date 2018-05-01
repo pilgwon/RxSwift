@@ -1,18 +1,18 @@
-Hot and Cold Observables
+RxSwift 핫 옵저버블과 콜드 옵저버블
 ========================
 
-IMHO, I would suggest to more think of this as property of sequences and not separate types because they are represented by the same abstraction that fits them perfectly, `Observable` sequence.
+제 소견으로는, 핫 옵저버블과 콜드 옵저버블을 독립된 타입이 아니라 시퀀스의 속성으로 보는 것을 추천드립니다. 왜냐하면 그들에게 딱 맞는 추상화인 `옵저버블` 시퀀스에서 동일하게 표현되기 때문입니다.
 
-This is a definition from ReactiveX.io
+다음은 ReactiveX.io에서 가져온 정의입니다.
 
-> When does an Observable begin emitting its sequence of items? It depends on the Observable. A “hot” Observable may begin emitting items as soon as it is created, and so any observer who later subscribes to that Observable may start observing the sequence somewhere in the middle. A “cold” Observable, on the other hand, waits until an observer subscribes to it before it begins to emit items, and so such an observer is guaranteed to see the whole sequence from the beginning.
+> 옵저버블은 시퀀스의 아이템을 언제 발생시킬까요? 옵저버블에 따라 다릅니다. "핫" 옵저버블은 아이템을 만들어지자마자 발생시키고, 그래서 다른 관찰자가 그 옵저저블에 구독하면 중간부터 관찰하게 될 것입니다. 반면에, "콜드" 옵저버블은 관찰자가 구독할때까지 아이템 발생을 기다려고, 관찰자가 모든 시퀀스를 시작부터 관찰할 수 있음을 보장받습니다.
 
-| Hot Observables                                                                                         | Cold observables                                                              |
-|---------------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------|
-| ... are sequences                                                                                       | ... are sequences                                                             |
-| Use resources ("produce heat") no matter if there is any observer subscribed.                           | Don't use resources (don't produce heat) until observer subscribes.           |
-| Variables / properties / constants, tap coordinates, mouse coordinates, UI control values, current time | Async operations, HTTP Connections, TCP connections, streams                  |
-| Usually contains ~ N elements                                                                           | Usually contains ~ 1 element                                                  |
-| Sequence elements are produced no matter if there is any observer subscribed.                           | Sequence elements are produced only if there is a subscribed observer.        |
-| Sequence computation resources are usually shared between all of the subscribed observers.              | Sequence computation resources are usually allocated per subscribed observer. |
-| Usually stateful                                                                                        | Usually stateless                                                             |
+| 핫 옵저버블                                                                                         | 콜드 옵저버블                                                              |
+|--------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------|
+| 예시                                                                                              | 예시                                                             |
+| 관찰자가 구독 여부에 상관없이 자원을 사용합니다. ("열을 생성함")                                                | 관찰자가 구독할때까지 자원을 사용하지 않습니다. (열을 생성하지 않음)           |
+| 변수 / 속성 / 상수, 탭 좌표, 마우스 좌표, UI 컨트롤 값, 현재 시간 | 비동기 작업, HTTP 커넥션, TCP 커넥션, 스트림     |
+| 보통 여러개의 요소를 포함합니다                                                                          | 보통 하나의 요소를 포함합니다                                                  |
+| 시퀀스 요소는 관찰자의 구독 여부에 상관없이 생성됩니다.                                                       | 구독한 관찰자가 있을 경우에만 시퀀스 요소가 생성됩니다.        |
+| 시퀀스 계산 자원이 모든 구독한 관찰자들과 공유됩니다.                                                         | 시퀀스 계산 자원이 구독한 관찰자들에게 각각 할당됩니다. |
+| 보통 상태를 저장함                                                                                   | 보통 상태를 저장하지 않음                                                |
