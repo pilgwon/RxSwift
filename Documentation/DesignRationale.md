@@ -1,59 +1,59 @@
 Design Rationale
 ================
 
-## Why error type isn't generic
+## 에러 타입이 제네릭이 아닌 이유
 
 ```Swift
 enum Event<Element>  {
-    case Next(Element)      // next element of a sequence
-    case Error(Error)   // sequence failed with error
-    case Completed          // sequence terminated successfully
+    case Next(Element)      // 시퀀스의 다음 요소
+    case Error(Error)   // 시퀀스가 에러로 실패함
+    case Completed          // 시퀀스가 성공적으로 종료됨
 }
 ```
 
-Let's discuss the pros and cons of `Error` being generic.
+`Error`가 제네릭인 것의 장점과 단점에 대해 얘기해봅시다.
 
-If you have a generic error type, you create additional impedance mismatch between two observables.
+제네릭 에러 타입을 사용한다면, 두 옵저버블 사이의 추가적인 임피던스 부정합을 만들게 됩니다.
 
-Let's say you have:
+여러분에게 다음과 같이 옵저버블이 있다고 해봅시다:
 
-`Observable<String, E1>` and `Observable<String, E2>`
+`Observable<String, E1>`과 `Observable<String, E2>`
 
-There isn't much you can do with them without figuring out what the resulting error type will be.
+결과의 에러 타입이 어떤건지 파악하지 않고 할 수 있는 일은 그렇게 많지 않습니다.
 
-Will it be `E1`, `E2` or some new `E3` maybe? So, you would need a new set of operators just to solve that impedance mismatch.
+결과는 `E1`, `E2`나 새로운 `E3`이 될까요? 아마 여러분은 그러한 임피던스 부정합을 해결할 새로운 셋의 연산자가 필요하게 될 것입니다.
 
-This hurts composition properties, and Rx isn't concerned with why a sequence fails, it just usually forwards failures further down the observable chain.
+이는 기본 속성을 손상시키고 Rx는 왜 시퀀스에 실패하는지에 대해 상관하지 않습니다. 일반적으로 옵저버블 체인의 아래로 계속 실패를 전달합니다.
 
-There is an additional problem that, in some cases, operators might fail due to some internal error, in which case you wouldn't be able to construct a resulting error and report failure.
+그리고 또 다른 문제가 있습니다. 어떤 경우엔 연산자들은 결과가 에러가 나거나 보고를 실패했을 때와 같이 내부 에러로 인해서 실패하기도 합니다.
 
-But OK, let's ignore that and assume we can use that to model sequences that don't error out. Could it be useful for that purpose?
+하지만 괜찮습니다. 이제 그러한 문제들을 무시하고 시퀀스를 에러가 나지 않게 모델링할 수 있다고 가정해봅시다. 그러한 목적으로 유용할까요?
 
-Well yes, it potentially could be, but let's consider why you would want to use sequences that don't error out.
+그렇습니다. 잠재적으로는 그렇습니다. 하지만 오류가 발생하지 않는 시퀀스를 사용해야 하는 이유를 생각해 보겠습니다.
 
-One obvious application would be for permanent streams in the UI layer that drive the entire UI. When you consider that case, it's not really sufficient to only use the compiler to prove that sequences don't error out, you also need to prove other properties. For instance, that elements are observed on `MainScheduler`.
+전체 UI를 조정하는 UI 레이어의 영원한 스트림을 위한 하나의 분명한 어플리케이션이 있습니다. 그러한 경우를 고려할 때, 시퀀스에 오류가 없다는 것을 입증하기 위해 컴파일러만 사용하는 것 뿐만 아니라, 다른 속성도 증명해야 합니다. 예를 들어, 그러한 요소들은 `MainScheduler`에서 관찰됩니다.
 
-What you really need is a generic way to prove traits for observable sequences. There are a lot of properties you could be interested in. For example:
+여러분이 정말로 필요로 하는 것은 옵저버블 시퀀스에 대한 특징을 증명하는 일반적인 방법입니다. 여러분이 흥미로워할만한 속성들이 많이 있습니다. 예를 들자면:
 
-* sequence terminates in finite time (server side)
-* sequence contains only one element (if you are running some computation)
-* sequence doesn't error out, never terminates and elements are delivered on main scheduler (UI)
-* sequence doesn't error out, never terminates and elements are delivered on main scheduler, and has refcounted sharing (UI)
-* sequence doesn't error out, never terminates and elements are delivered on specific background scheduler (audio engine)
+* 시퀀스는 유한한 시간내에 종료됩니다. (서버 사이드)
+* 시퀀스는 오직 하나의 요소만을 포함합니다. (계산을 하고 있는 중이라도 말이죠)
+* 시퀀스는 에러를 발생하지 않고, 절대 종료되지 않으며 요소들은 메인 스케줄러에 전달됩니다. (UI)
+* 시퀀스는 에러를 발생하지 않고, 절대 종료되지 않으며 요소들은 메인 스케줄러에 전달되고 레퍼런스 카운트 공유를 가지고 있습니다. (UI)
+* 시퀀스는 에러를 발생하지 않고, 절대 종료되지 않으며 요소들은 특정 백그라운드 스케줄러에 전달됩니다. (오디오 엔진)
 
-What you really want is a general compiler-enforced system of traits for observable sequences, and a set of invariant operators for those wanted properties.
+여러분이 정말로 원하는 것은 옵저버블 시퀀스를 위한 보통의 컴파일러-강제 특징 시스템과, 원하는 속성에 대한 불변 연산자 셋입니다.
 
-A good analogy would be:
+여기 좋은 비유가 있습니다:
 
 ```
 1, 3.14, e, 2.79, 1 + 1i      <->    Observable<E>
-1m/s, 1T, 5kg, 1.3 pounds     <->    Errorless observable, UI observable, Finite observable ...
+1m/s, 1T, 5kg, 1.3 pounds     <->    에러리스 옵저버블, UI 옵저버블, 한정된 옵저버블 ...
 ```
 
-There are many ways to do such a thing in Swift by either using composition or inheritance of observables.
+옵저버블 대상의 구성이나 상속을 사용하여 스위프트에서 이러한 작업을 수행하는 방법엔 많은 종류가 있습니다.
 
-An additional benefit of using a unit system is that you can prove that UI code is executing on the same scheduler and thus use lockless operators for all transformations.
+유닛 시스템을 사용하는 또 다른 이점은 UI 코드가 동일한 스케쥴러에서 실행되고 모든 변환에 잠금없는 연산자를 사용한다는 것을 증명할 수 있다는 것입니다.
 
-Since RxSwift already doesn't have locks for single sequence operations, and all of the locks that do exist are in stateful components (e.g. UI), there are practically no locks in RxSwift code, which allows for such details to be compiler enforced.
+RxSwift는 단일 시퀀스 작업에 대해 잠금이 없기 때문에, 존재하는 모든 잠금들은 상태 저장 컴포넌트에 있습니다. (예. UI) 사실상 RxSwift 코드엔 잠금이 없기 때문에 컴파일러가 세부 사항을 강제할 수 있습니다.
 
-There really is no benefit to using typed `Error`s that couldn't be achieved in other cleaner ways while preserving Rx compositional semantics.
+Rx 구성적 의미를 유지하면서 깨끗한 방법으로는 얻을 수 없는 타입의 `Error`를 사용하는 것은 실제로 이점이 전혀 없습니다.
