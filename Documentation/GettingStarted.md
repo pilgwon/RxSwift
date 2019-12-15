@@ -141,9 +141,9 @@ subscription.dispose()
 
 그래서 이 무언가를 출력하는 코드는 `dispose`를 호출한 이후에 종료되나요? 대답은 상황에 따라 다르다 입니다.
 
-* 만약 `scheduler`가 **시리얼 스케쥴러**(예. `MainScheduler`)이고, `dispose`가 **같은 시리얼 스케쥴러에서** 호출됐다면 대답은 아니요 입니다.
+* 만약 `scheduler`가 **시리얼 스케쥴러**(예. `MainScheduler`)이고, `dispose`가 **같은 시리얼 스케쥴러에서** 호출됐다면 대답은 **예** 입니다.
 
-* 다른 경우엔 모두 **예** 입니다.
+* 다른 경우엔 모두 **아니오** 입니다.
 
 스케쥴러에 대한 내용은 [여기서](https://github.com/ReactiveX/RxSwift/blob/master/Documentation/Schedulers.md) 더 확인하실 수 있습니다.
 
